@@ -134,15 +134,17 @@ class UWSMQ_Admin {
 			$new_settings['secret_key']     = sanitize_text_field( $_POST['secret_key'] );
 			$new_settings['log_limit']      = isset( $_POST['log_limit'] ) ? (int)$_POST['log_limit'] : 1000;
 			
+			update_option( 'uwsmq_settings', $new_settings );
+
 			if ( $old_settings['interval'] != $new_settings['interval'] || $old_settings['dont_use_wpcron'] != $new_settings['dont_use_wpcron'] ) {
 				wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
 				if ( $new_settings['dont_use_wpcron'] !== 'yes' ) {
 					wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
 				}
 			}
+		} else {
+			update_option( 'uwsmq_settings', $new_settings );
 		}
-
-		update_option( 'uwsmq_settings', $new_settings );
 	}
 
 	private function display_tools_page() {
