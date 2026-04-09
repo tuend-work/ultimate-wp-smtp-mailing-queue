@@ -8,7 +8,7 @@ class UWSMQ_Core {
 
 	public function __construct() {
 		$this->plugin_name = 'ultimate-wp-smtp-mailing-queue';
-		$this->version = '1.0.9';
+		$this->version = '1.2.1';
 
 		$this->load_dependencies();
 		$this->define_admin_hooks();

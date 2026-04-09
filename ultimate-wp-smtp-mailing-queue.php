@@ -3,7 +3,7 @@
  * Plugin Name: Ultimate WP SMTP Mailing Queue
  * Plugin URI: https://example.com/ultimate-wp-smtp-mailing-queue
  * Description: A professional SMTP mailing queue plugin for WordPress. Reliable delivery, batch processing, and premium admin UI.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Antigravity
  * Author URI: https://antigravity.google
  * License: GPL2
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constants
-define( 'UWSMQ_VERSION', '1.2.0' );
+define( 'UWSMQ_VERSION', '1.2.1' );
 define( 'UWSMQ_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'UWSMQ_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'UWSMQ_BASENAME', plugin_basename( __FILE__ ) );
