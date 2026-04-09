@@ -4,7 +4,7 @@
  * Plugin URI: https://example.com/ultimate-wp-smtp-mailing-queue
  * Description: A professional SMTP mailing queue plugin for WordPress. Reliable delivery, batch processing, and premium admin UI.
  * Version: 1.2.2
- * Author: Antigravity
+ * Author: Nguyễn Đức Tuệ
  * Author URI: https://antigravity.google
  * License: GPL2
  * Text Domain: ultimate-wp-smtp-mailing-queue
@@ -28,11 +28,12 @@ define( 'UWSMQ_BASENAME', plugin_basename( __FILE__ ) );
 function activate_ultimate_wp_smtp_mailing_queue() {
 	require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-activator.php';
 	UWSMQ_Activator::activate();
+	// Set flag to redirect to settings after activation
+	set_transient( 'uwsmq_activation_redirect', true, 30 );
 }
 
 /**
  * The code that runs during plugin deactivation.
- * This action is documented in includes/class-uwsmq-deactivator.php
  */
 function deactivate_ultimate_wp_smtp_mailing_queue() {
 	require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-deactivator.php';
@@ -41,6 +42,30 @@ function deactivate_ultimate_wp_smtp_mailing_queue() {
 
 register_activation_hook( __FILE__, 'activate_ultimate_wp_smtp_mailing_queue' );
 register_deactivation_hook( __FILE__, 'deactivate_ultimate_wp_smtp_mailing_queue' );
+
+/**
+ * Add "Settings" link on the Plugins list page.
+ */
+function uwsmq_plugin_action_links( $links ) {
+	$settings_link = '<a href="' . admin_url( 'admin.php?page=ultimate-wp-smtp-mailing-queue' ) . '">Settings</a>';
+	array_unshift( $links, $settings_link );
+	return $links;
+}
+add_filter( 'plugin_action_links_' . UWSMQ_BASENAME, 'uwsmq_plugin_action_links' );
+
+/**
+ * Redirect to settings page after activation.
+ */
+function uwsmq_activation_redirect() {
+	if ( get_transient( 'uwsmq_activation_redirect' ) ) {
+		delete_transient( 'uwsmq_activation_redirect' );
+		if ( ! isset( $_GET['activate-multi'] ) ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=ultimate-wp-smtp-mailing-queue' ) );
+			exit;
+		}
+	}
+}
+add_action( 'admin_init', 'uwsmq_activation_redirect' );
 
 /**
  * Core loader class.
@@ -61,3 +86,4 @@ if ( ! function_exists( 'wp_mail' ) ) {
 		return $mailer->handle_wp_mail( $to, $subject, $message, $headers, $attachments );
 	}
 }
+
