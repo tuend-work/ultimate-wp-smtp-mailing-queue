@@ -73,7 +73,7 @@
                         'time' => time()
                     ), home_url( '/' ) );
                     ?>
-                    <p class="description">Call <code><?php echo esc_url( $cron_url ); ?></code> in cron to start processing queue.</p>
+                    <p class="description">Addd thist cron job <code>* * * * * wget -q -O - <?php echo esc_url( $cron_url ); ?> >/dev/null 2>&1</code> to VPS / Hosting Cronjob.</p>
                 </td>
             </tr>
             <tr>
