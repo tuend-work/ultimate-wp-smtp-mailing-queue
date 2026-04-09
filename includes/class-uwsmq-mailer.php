@@ -19,39 +19,49 @@ class UWSMQ_Mailer {
 
 	public function pre_wp_mail_filter( $return, $atts ) {
 		$settings = get_option( 'uwsmq_settings' );
+		$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
 
-		// Extract attributes
-		$to          = $atts['to'];
-		$subject     = $atts['subject'];
-		$message     = $atts['message'];
+		if ( $this->is_processing ) {
+			return null; // Don't queue if we're already processing the queue
+		}
+
+		if ( $this->force_direct ) {
+			return null; // Don't queue if explicitly forced direct (e.g. from Test Email with Send now)
+		}
+
+		if ( ! $enable_queue ) {
+			return null; // Don't queue if setting is disabled
+		}
+
+		// EXTRACT DATA
+		$to          = isset( $atts['to'] ) ? $atts['to'] : '';
+		$subject     = isset( $atts['subject'] ) ? $atts['subject'] : '';
+		$message     = isset( $atts['message'] ) ? $atts['message'] : '';
 		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
 		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
-
-		// If we are currently processing the queue, or forced direct, don't re-queue
-		if ( $this->is_processing || $this->force_direct || ( isset( $settings['enable_queue'] ) && $settings['enable_queue'] !== 'yes' ) ) {
-			// Returning null tells WordPress to continue with the default wp_mail flow (which will hit our phpmailer_init)
-			return null;
-		}
 
 		// Add to queue
 		UWSMQ_Queue::add_to_queue( $to, $subject, $message, $headers, $attachments );
 		
-		// Returning true tells WordPress that the email has been "handled"
 		return true;
 	}
 
 	public function handle_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
-
-		$settings = get_option( 'uwsmq_settings' );
-
-		// If we are currently processing the queue, or forced direct, don't re-queue
-		if ( $this->is_processing || $this->force_direct || ( isset( $settings['enable_queue'] ) && $settings['enable_queue'] !== 'yes' ) ) {
-			return $this->original_wp_mail( $to, $subject, $message, $headers, $attachments );
+		// This is for fallback if someone calls handle_wp_mail directly
+		$atts = array(
+			'to'          => $to,
+			'subject'     => $subject,
+			'message'     => $message,
+			'headers'     => $headers,
+			'attachments' => $attachments
+		);
+		$result = $this->pre_wp_mail_filter( null, $atts );
+		
+		if ( $result === true ) {
+			return true;
 		}
-
-		// Add to queue
-		UWSMQ_Queue::add_to_queue( $to, $subject, $message, $headers, $attachments );
-		return true; // Return true to indicate we "handled" it by queuing.
+		
+		return $this->original_wp_mail( $to, $subject, $message, $headers, $attachments );
 	}
 
 	private function original_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
