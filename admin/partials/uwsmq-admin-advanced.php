@@ -1,6 +1,6 @@
 <div class="uwsmq-settings-wrap">
     <div class="uwsmq-cron-info" style="margin-bottom: 20px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
+        <div style="line-height: 26px;">
             <strong><?php esc_html_e( 'Cron Status:', 'ultimate-wp-smtp-mailing-queue' ); ?></strong> 
             <span class="uwsmq-cron-time" style="color: #2271b1;"><?php echo esc_html( $cron_status ); ?></span>
             <button id="uwsmq-refresh-cron" class="button" title="<?php esc_attr_e( 'Reschedule Cron', 'ultimate-wp-smtp-mailing-queue' ); ?>" style="padding: 0 5px; margin-left: 5px; height: 26px; line-height: 24px;">🔄</button>
