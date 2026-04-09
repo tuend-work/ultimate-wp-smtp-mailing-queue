@@ -5,28 +5,7 @@ class UWSMQ_Activator {
 	public static function activate() {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'uwsmq_queue';
 		$charset_collate = $wpdb->get_charset_collate();
-
-		$sql = "CREATE TABLE $table_name (
-			id bigint(20) NOT NULL AUTO_INCREMENT,
-			log_id bigint(20) DEFAULT NULL,
-			to_email text NOT NULL,
-			subject text NOT NULL,
-			message longtext NOT NULL,
-			headers text DEFAULT '' NOT NULL,
-			attachments text DEFAULT '' NOT NULL,
-			status varchar(20) DEFAULT 'pending' NOT NULL,
-			attempts int(11) DEFAULT 0 NOT NULL,
-			error_message text DEFAULT '' NOT NULL,
-			created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
-			sent_at datetime DEFAULT NULL,
-			PRIMARY KEY  (id),
-			KEY status (status)
-		) $charset_collate;";
-
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		dbDelta( $sql );
 
 		$table_logs = $wpdb->prefix . 'uwsmq_logs';
 		$sql_logs = "CREATE TABLE $table_logs (
@@ -36,14 +15,18 @@ class UWSMQ_Activator {
 			subject text NOT NULL,
 			message longtext DEFAULT '' NOT NULL,
 			headers longtext DEFAULT '' NOT NULL,
+			attachments longtext DEFAULT '' NOT NULL,
 			status varchar(20) NOT NULL,
+			attempts int(11) DEFAULT 0 NOT NULL,
 			error_message text DEFAULT '' NOT NULL,
 			queued_at datetime DEFAULT NULL,
 			sent_at datetime DEFAULT NULL,
 			source varchar(20) DEFAULT 'direct' NOT NULL,
-			PRIMARY KEY  (id)
+			PRIMARY KEY  (id),
+			KEY status (status)
 		) $charset_collate;";
 
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql_logs );
 
 		// Set default options

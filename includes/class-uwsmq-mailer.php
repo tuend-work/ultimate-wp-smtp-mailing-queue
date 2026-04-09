@@ -36,11 +36,11 @@ class UWSMQ_Mailer {
 		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
 		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
 
-		// Create Log entry first to get ID
-		$log_id = UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers, $message, current_time( 'mysql' ) );
+		// Store attachments if any
+		$stored_attachments = UWSMQ_Attachments::store_attachments( $attachments );
 
-		// Add to queue with log_id
-		UWSMQ_Queue::add_to_queue( $to, $subject, $message, $headers, $attachments, $log_id );
+		// Create unified entry in Logs table
+		UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers, $message, current_time( 'mysql' ), $stored_attachments, 0 );
 		
 		return true;
 	}
@@ -54,7 +54,7 @@ class UWSMQ_Mailer {
 			'attachments' => $attachments
 		);
 		
-		// If the filter returns true, it handled the queuing
+		// If the filter returns true, it handled the queuing/logging
 		if ( $this->pre_wp_mail_filter( null, $atts ) === true ) {
 			return true;
 		}
@@ -64,7 +64,6 @@ class UWSMQ_Mailer {
 	}
 
 	private function original_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
-		// This uses the built-in PHPMailer via the phpmailer_init hook which we already set up.
 		require_once ABSPATH . WPINC . '/pluggable.php';
 		return $this->send_with_phpmailer( $to, $subject, $message, $headers, $attachments );
 	}
@@ -93,10 +92,16 @@ class UWSMQ_Mailer {
 		}
 
 		$this->is_processing = true;
+		global $wpdb;
+
 		$settings = get_option( 'uwsmq_settings' );
 		$batch_size = isset( $settings['batch_size'] ) ? (int)$settings['batch_size'] : 10;
 
-		$items = UWSMQ_Queue::get_pending_items( $batch_size );
+		$table_name = $wpdb->prefix . 'uwsmq_logs';
+		$items = $wpdb->get_results( $wpdb->prepare(
+			"SELECT * FROM $table_name WHERE status = 'queue' OR status = 'failed' ORDER BY id ASC LIMIT %d",
+			$batch_size
+		) );
 
 		foreach ( $items as $item ) {
 			$this->process_single_item( $item );
@@ -114,7 +119,8 @@ class UWSMQ_Mailer {
 		global $wpdb;
 		
 		$ids_placeholder = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-		$query = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}uwsmq_queue WHERE id IN ($ids_placeholder)", $ids );
+		$table_name = $wpdb->prefix . 'uwsmq_logs';
+		$query = $wpdb->prepare( "SELECT * FROM $table_name WHERE id IN ($ids_placeholder)", $ids );
 		$items = $wpdb->get_results( $query );
 
 		foreach ( $items as $item ) {
@@ -125,7 +131,7 @@ class UWSMQ_Mailer {
 	}
 
 	private function process_single_item( $item ) {
-		UWSMQ_Queue::update_status( $item->id, 'sending' );
+		UWSMQ_Logs::update_log_status( $item->id, 'processing' );
 		
 		$headers = maybe_unserialize( $item->headers );
 		$attachments = maybe_unserialize( $item->attachments );
@@ -139,22 +145,10 @@ class UWSMQ_Mailer {
 		);
 
 		if ( $result ) {
-			UWSMQ_Queue::update_status( $item->id, 'sent', '', $item->attempts + 1 );
-			if ( $item->log_id ) {
-				UWSMQ_Logs::update_log_status( $item->log_id, 'sent' );
-			} else {
-				// Fallback for old items
-				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'sent', '', 'queue', '', $headers, $item->message, $item->created_at );
-			}
+			UWSMQ_Logs::update_log_status( $item->id, 'sent', '', null, true );
 		} else {
 			global $phpmailer_error;
-			UWSMQ_Queue::update_status( $item->id, 'failed', $phpmailer_error, $item->attempts + 1 );
-			if ( $item->log_id ) {
-				UWSMQ_Logs::update_log_status( $item->log_id, 'failed', $phpmailer_error );
-			} else {
-				// Fallback for old items
-				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'failed', $phpmailer_error, 'queue', '', $headers, $item->message, $item->created_at );
-			}
+			UWSMQ_Logs::update_log_status( $item->id, 'failed', $phpmailer_error, null, true );
 		}
 	}
 

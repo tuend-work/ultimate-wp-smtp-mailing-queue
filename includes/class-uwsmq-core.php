@@ -18,7 +18,6 @@ class UWSMQ_Core {
 	private function load_dependencies() {
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-attachments.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-logs.php';
-		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-queue.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-mailer.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-admin.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-updater.php';

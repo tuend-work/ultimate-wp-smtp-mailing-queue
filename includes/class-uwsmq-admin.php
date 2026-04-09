@@ -241,7 +241,8 @@ class UWSMQ_Admin {
 	public function ajax_delete_item() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
 		$id = (int)$_POST['id'];
-		UWSMQ_Queue::delete_item( $id );
+		global $wpdb;
+		$wpdb->delete( $wpdb->prefix . 'uwsmq_logs', array( 'id' => $id ) );
 		wp_send_json_success();
 	}
 
@@ -263,19 +264,14 @@ class UWSMQ_Admin {
 		}
 
 		global $wpdb;
+		$table_name = $wpdb->prefix . 'uwsmq_logs';
 
 		if ( $action === 'bulk-delete' ) {
-			foreach ( $ids as $id ) {
-				$wpdb->delete( $wpdb->prefix . 'uwsmq_logs', array( 'id' => $id ) );
-				$wpdb->delete( $wpdb->prefix . 'uwsmq_queue', array( 'log_id' => $id ) );
-			}
+			$ids_placeholder = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM $table_name WHERE id IN ($ids_placeholder)", $ids ) );
 		} elseif ( $action === 'bulk-send' ) {
 			$mailer = UWSMQ_Mailer::get_instance();
-			$ids_placeholder = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-			$qids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}uwsmq_queue WHERE log_id IN ($ids_placeholder)", $ids ) );
-			if ( ! empty( $qids ) ) {
-				$mailer->process_bulk_items( $qids );
-			}
+			$mailer->process_bulk_items( $ids );
 		}
 
 		wp_send_json_success();
@@ -290,19 +286,11 @@ class UWSMQ_Admin {
 
 	public function ajax_send_now() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
-		$log_id = (int)$_POST['id'];
-		
-		global $wpdb;
-		$queue_item = $wpdb->get_row( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}uwsmq_queue WHERE log_id = %d", $log_id ) );
+		$id = (int)$_POST['id'];
 		
 		$mailer = UWSMQ_Mailer::get_instance();
-		if ( $queue_item ) {
-			$mailer->process_bulk_items( array( $queue_item->id ) );
-			wp_send_json_success();
-		} else {
-			// If not found in queue by log_id, it might be an old item or already sent
-			wp_send_json_error( array( 'message' => 'Queue item not found or already processed.' ) );
-		}
+		$mailer->process_bulk_items( array( $id ) );
+		wp_send_json_success();
 	}
 
 	public function display_logs_page() {

@@ -27,7 +27,7 @@ class UWSMQ_Logs {
 		}
 	}
 
-	public static function add_log( $to, $subject, $status, $error = '', $source = 'direct', $from = '', $headers = '', $message = '', $queued_at = null ) {
+	public static function add_log( $to, $subject, $status, $error = '', $source = 'direct', $from = '', $headers = '', $message = '', $queued_at = null, $attachments = array(), $attempts = 0 ) {
 		global $wpdb;
 		
 		if ( empty( $from ) ) {
@@ -43,7 +43,9 @@ class UWSMQ_Logs {
 				'subject'       => $subject,
 				'message'       => $message,
 				'headers'       => is_array( $headers ) ? serialize( $headers ) : $headers,
+				'attachments'   => maybe_serialize( $attachments ),
 				'status'        => $status,
+				'attempts'      => $attempts,
 				'error_message' => $error,
 				'queued_at'     => $queued_at,
 				'sent_at'       => ( $status === 'sent' ) ? current_time( 'mysql' ) : null,
@@ -59,20 +61,41 @@ class UWSMQ_Logs {
 		return $wpdb->insert_id;
 	}
 
-	public static function update_log_status( $id, $status, $error = '', $sent_at = null ) {
+	public static function update_log_status( $id, $status, $error = '', $sent_at = null, $increment_attempts = false ) {
 		global $wpdb;
+		$table_name = $wpdb->prefix . 'uwsmq_logs';
 		$data = array( 'status' => $status );
-		if ( ! empty( $error ) ) $data['error_message'] = $error;
+		
+		if ( ! empty( $error ) ) {
+			$data['error_message'] = $error;
+		}
+
 		if ( $sent_at ) {
 			$data['sent_at'] = $sent_at;
 		} elseif ( $status === 'sent' ) {
 			$data['sent_at'] = current_time( 'mysql' );
 		}
 
-		return $wpdb->update(
-			$wpdb->prefix . 'uwsmq_logs',
-			$data,
-			array( 'id' => $id )
-		);
+		$sql = "UPDATE $table_name SET status = %s";
+		$params = array( $status );
+
+		if ( ! empty( $error ) ) {
+			$sql .= ", error_message = %s";
+			$params[] = $error;
+		}
+
+		if ( isset( $data['sent_at'] ) ) {
+			$sql .= ", sent_at = %s";
+			$params[] = $data['sent_at'];
+		}
+
+		if ( $increment_attempts ) {
+			$sql .= ", attempts = attempts + 1";
+		}
+
+		$sql .= " WHERE id = %d";
+		$params[] = $id;
+
+		return $wpdb->query( $wpdb->prepare( $sql, $params ) );
 	}
 }
