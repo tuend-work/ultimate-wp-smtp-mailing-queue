@@ -199,24 +199,21 @@ class UWSMQ_Admin {
 			$mailer->force_direct_send( false );
 		}
 
-		$settings = get_option( 'uwsmq_settings' );
-		$eq = isset( $settings['enable_queue'] ) ? $settings['enable_queue'] : 'not set';
-		$fd = $mailer->get_force_direct() ? 'true' : 'false';
+
 
 		global $phpmailer_error;
 		if ( $result ) {
-			$msg = "Email handled! [Queue: $eq, ForceDirect: $fd]";
 			// Only log here if it was a direct send. If it was queued, UWSMQ_Queue::add_to_queue already logged it.
 			if ( $direct ) {
 				UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers, $message );
 			}
-			wp_send_json_success( array( 'message' => $msg ) );
+			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );
 		} else {
 			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : 'Failed to send email.';
 			if ( $direct ) {
 				UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers, $message );
 			}
-			wp_send_json_error( array( 'message' => $error_msg . " [Queue: $eq]" ) );
+			wp_send_json_error( array( 'message' => $error_msg ) );
 		}
 	}
 
