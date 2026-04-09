@@ -1,0 +1,362 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ultimate WP SMTP Mailing Queue\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-09 12:29+0000\n"
+"PO-Revision-Date: 2026-04-09 13:15+0000\n"
+"Last-Translator: admin\n"
+"Language-Team: Tiếng Việt\n"
+"Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.8.3; wp-6.9.4; php-8.2.27\n"
+"X-Domain: ultimate-wp-smtp-mailing-queue"
+
+#. Description of the plugin
+msgid ""
+"A professional SMTP mailing queue plugin for WordPress. Reliable delivery, "
+"batch processing, and premium admin UI."
+msgstr ""
+"Một plugin hàng đợi gửi thư SMTP chuyên nghiệp cho WordPress. Giao hàng đáng "
+"tin cậy, xử lý theo lô và giao diện quản trị cao cấp."
+
+#: admin/partials/uwsmq-email-monitor.php:59
+msgid "Actions"
+msgstr "Hành động"
+
+#: includes/class-uwsmq-admin.php:65
+msgid "Advanced Settings"
+msgstr "Cài đặt nâng cao"
+
+#: admin/partials/uwsmq-email-monitor.php:41
+msgid "Apply"
+msgstr "Áp dụng"
+
+#: admin/partials/uwsmq-admin-settings.php:32
+msgid "Authentication"
+msgstr "Xác thực"
+
+#: includes/class-uwsmq-updater.php:30
+msgid "AUTO-UPDATE FROM GITHUB NOW"
+msgstr "TỰ ĐỘNG CẬP NHẬT TỪ GITHUB NGAY"
+
+#: admin/partials/uwsmq-admin-advanced.php:42
+msgid "Batch Size"
+msgstr "Kích thước lô"
+
+#: admin/partials/uwsmq-admin-tools-test.php:15
+msgid "Bcc email addresses"
+msgstr "Địa chỉ email Bcc"
+
+#: admin/partials/uwsmq-email-monitor.php:37
+msgid "Bulk actions"
+msgstr "Hành động hàng loạt"
+
+#: admin/partials/uwsmq-admin-tools-test.php:8
+msgid "Cc email addresses"
+msgstr "Địa chỉ email Cc"
+
+#: admin/partials/uwsmq-admin-advanced.php:30
+msgid "Configure how emails are queued and processed by the system."
+msgstr "Cấu hình cách email được xếp hàng đợi và xử lý bởi hệ thống."
+
+#: admin/partials/uwsmq-admin-advanced.php:79
+msgid "Cron Interval (seconds)"
+msgstr "Khoảng thời gian Cron (giây)"
+
+#: admin/partials/uwsmq-admin-advanced.php:4
+msgid "Cron Status:"
+msgstr "Trạng thái Cron:"
+
+#: admin/partials/uwsmq-admin-advanced.php:37
+msgid "Defer email sending to background queue"
+msgstr "Hoãn gửi email vào hàng đợi nền"
+
+#: admin/partials/uwsmq-email-monitor.php:102
+msgid "Delete"
+msgstr "Xóa"
+
+#: admin/partials/uwsmq-email-monitor.php:39
+msgid "Delete selected"
+msgstr "Xóa đã chọn"
+
+#: admin/partials/uwsmq-admin-settings.php:54
+msgid "Email address that emails will appear to come from."
+msgstr "Địa chỉ email mà email sẽ hiển thị là đến từ."
+
+#: admin/partials/uwsmq-email-monitor.php:2
+msgid "Email Monitor"
+msgstr "Giám sát Email"
+
+#: includes/class-uwsmq-admin.php:67
+msgid "Email Queue Monitor"
+msgstr "Giám sát Hàng đợi Email"
+
+#: includes/class-uwsmq-admin.php:230
+msgid "Email sent/queued successfully!"
+msgstr "Email đã gửi/xếp hàng thành công!"
+
+#: admin/partials/uwsmq-admin-advanced.php:34
+msgid "Enable Queue"
+msgstr "Bật Hàng đợi"
+
+#: admin/partials/uwsmq-admin-settings.php:22
+msgid "Encryption"
+msgstr "Mã hóa"
+
+#: admin/partials/uwsmq-admin-settings.php:6
+msgid ""
+"Enter your SMTP server details to route all WordPress emails through this "
+"account."
+msgstr ""
+"Nhập chi tiết máy chủ SMTP của bạn để định tuyến tất cả email WordPress qua "
+"tài khoản này."
+
+#: includes/class-uwsmq-admin.php:232
+msgid "Failed to send email."
+msgstr "Không gửi được email."
+
+#: admin/partials/uwsmq-email-monitor.php:53
+msgid "From"
+msgstr "Từ"
+
+#: admin/partials/uwsmq-admin-settings.php:51
+msgid "From Email"
+msgstr "Email người gửi"
+
+#: admin/partials/uwsmq-admin-settings.php:58
+msgid "From Name"
+msgstr "Tên người gửi"
+
+#. Author URI of the plugin
+msgid "https://antigravity.google"
+msgstr "https://antigravity.google"
+
+#. URI of the plugin
+msgid "https://example.com/ultimate-wp-smtp-mailing-queue"
+msgstr "https://example.com/ultimate-wp-smtp-mailing-queue"
+
+#: admin/partials/uwsmq-admin-advanced.php:49
+msgid "Log Limit"
+msgstr "Giới hạn Nhật ký"
+
+#: admin/partials/uwsmq-admin-advanced.php:52
+msgid ""
+"Maximum number of log entries to retain. Older logs will be deleted "
+"automatically."
+msgstr ""
+"Số lượng mục nhật ký tối đa cần giữ lại. Các nhật ký cũ hơn sẽ tự động bị "
+"xóa."
+
+#: admin/partials/uwsmq-admin-tools-test.php:26
+msgid "Message"
+msgstr "Tin nhắn"
+
+#: admin/partials/uwsmq-admin-tools-test.php:11
+#: admin/partials/uwsmq-admin-tools-test.php:18
+msgid "Multiple addresses can be added separated by comma."
+msgstr "Có thể thêm nhiều địa chỉ, cách nhau bằng dấu phẩy."
+
+#: admin/partials/uwsmq-admin-settings.php:61
+msgid "Name that emails will appear to come from."
+msgstr "Tên mà email sẽ hiển thị là đến từ."
+
+#. Author of the plugin
+msgid "Nguyễn Đức Tuệ"
+msgstr "Nguyễn Đức Tuệ"
+
+#: admin/partials/uwsmq-email-monitor.php:65
+msgid "No email logs found."
+msgstr "Không tìm thấy nhật ký email nào."
+
+#: includes/class-uwsmq-admin.php:278
+msgid "No items selected."
+msgstr "Không có mục nào được chọn."
+
+#: admin/partials/uwsmq-admin-settings.php:27
+msgid "None"
+msgstr "Không có"
+
+#: admin/partials/uwsmq-admin-advanced.php:45
+msgid "Number of emails to send in each interval."
+msgstr "Số lượng email cần gửi trong mỗi khoảng thời gian."
+
+#: admin/partials/uwsmq-admin-settings.php:45
+msgid "Password"
+msgstr "Mật khẩu"
+
+#: includes/class-uwsmq-updater.php:96
+msgid "Plugin updated successfully from GitHub!"
+msgstr "Plugin đã được cập nhật thành công từ GitHub!"
+
+#: admin/partials/uwsmq-email-monitor.php:6
+msgid "Process All Queue"
+msgstr "Xử lý tất cả Hàng đợi"
+
+#: admin/partials/uwsmq-admin-advanced.php:29
+msgid "Queue & CRON Settings"
+msgstr "Cài đặt Hàng đợi & CRON"
+
+#: includes/class-uwsmq-admin.php:247
+msgid "Queue processed successfully."
+msgstr "Hàng đợi đã được xử lý thành công."
+
+#: admin/partials/uwsmq-admin-advanced.php:6
+msgid "Reschedule Cron"
+msgstr "Lên lịch lại Cron"
+
+#: admin/partials/uwsmq-admin-advanced.php:87
+msgid "Save Advanced Settings"
+msgstr "Lưu Cài đặt nâng cao"
+
+#: admin/partials/uwsmq-admin-settings.php:67
+msgid "Save Settings"
+msgstr "Lưu Cài đặt"
+
+#: admin/partials/uwsmq-admin-advanced.php:56
+msgid "Secret Key"
+msgstr "Khóa bí mật"
+
+#: admin/partials/uwsmq-email-monitor.php:100
+msgid "Send"
+msgstr "Gửi"
+
+#: admin/partials/uwsmq-admin-tools-test.php:34
+msgid "Send directly without waiting for cronjob to process queue"
+msgstr "Gửi trực tiếp mà không cần chờ cronjob xử lý hàng đợi"
+
+#: admin/partials/uwsmq-admin-tools-test.php:30
+msgid "Send now?"
+msgstr "Gửi ngay?"
+
+#: admin/partials/uwsmq-email-monitor.php:38
+msgid "Send selected"
+msgstr "Gửi đã chọn"
+
+#: admin/partials/uwsmq-admin-tools-test.php:40
+msgid "Send Test Email"
+msgstr "Gửi Email Kiểm Tra"
+
+#: admin/partials/uwsmq-email-monitor.php:57
+msgid "Sent At"
+msgstr "Đã gửi lúc"
+
+#: ultimate-wp-smtp-mailing-queue.php:58 includes/class-uwsmq-admin.php:38
+#: includes/class-uwsmq-admin.php:39
+msgid "Settings"
+msgstr "Cài đặt"
+
+#: admin/partials/uwsmq-admin-advanced.php:67
+msgid "Setup this cronjob to VPS / Hosting if WP_CRON is disabled."
+msgstr "Thiết lập cronjob này cho VPS / Hosting nếu WP_CRON bị vô hiệu hóa."
+
+#: admin/partials/uwsmq-admin-settings.php:5
+msgid "SMTP Configuration"
+msgstr "Cấu hình SMTP"
+
+#: admin/partials/uwsmq-admin-settings.php:10
+msgid "SMTP Host"
+msgstr "Máy chủ SMTP"
+
+#: includes/class-uwsmq-admin.php:27 includes/class-uwsmq-admin.php:73
+msgid "SMTP Mailing Queue"
+msgstr "Hàng đợi gửi thư SMTP"
+
+#: admin/partials/uwsmq-admin-settings.php:16
+msgid "SMTP Port"
+msgstr "Cổng SMTP"
+
+#: includes/class-uwsmq-admin.php:28
+msgid "SMTP Queue"
+msgstr "Hàng đợi SMTP"
+
+#: includes/class-uwsmq-admin.php:64
+msgid "SMTP Settings"
+msgstr "Cài đặt SMTP"
+
+#: admin/partials/uwsmq-email-monitor.php:58
+msgid "Source"
+msgstr "Nguồn"
+
+#: admin/partials/uwsmq-email-monitor.php:56
+msgid "Status"
+msgstr "Trạng thái"
+
+#: admin/partials/uwsmq-admin-tools-test.php:22
+#: admin/partials/uwsmq-email-monitor.php:55
+msgid "Subject"
+msgstr "Chủ đề"
+
+#: includes/class-uwsmq-admin.php:66
+msgid "Test Email"
+msgstr "Email Kiểm Tra"
+
+#: admin/partials/uwsmq-admin-advanced.php:82
+msgid ""
+"The interval in seconds to process the queue when using wp_cron. Default is "
+"300 (5 minutes)."
+msgstr ""
+"Khoảng thời gian tính bằng giây để xử lý hàng đợi khi sử dụng wp_cron. Mặc "
+"định là 300 (5 phút)."
+
+#: admin/partials/uwsmq-admin-advanced.php:59
+msgid ""
+"This key is needed to start processing the queue manually or via cronjob."
+msgstr ""
+"Khóa này là cần thiết để bắt đầu xử lý hàng đợi thủ công hoặc thông qua "
+"cronjob."
+
+#: admin/partials/uwsmq-email-monitor.php:54
+msgid "To"
+msgstr "Đến"
+
+#: admin/partials/uwsmq-admin-tools-test.php:4
+msgid "To email address"
+msgstr "Địa chỉ email người nhận"
+
+#. Name of the plugin
+msgid "Ultimate WP SMTP Mailing Queue"
+msgstr "Hàng đợi gửi thư Ultimate WP SMTP"
+
+#: includes/class-uwsmq-updater.php:25
+msgid "Ultimate WP SMTP Mailing Queue Auto-Updater"
+msgstr "Tự động cập nhật hàng đợi gửi thư Ultimate WP SMTP"
+
+#: includes/class-uwsmq-updater.php:43
+msgid "Unauthorized action."
+msgstr "Hành động không được phép."
+
+#: includes/class-uwsmq-admin.php:198
+msgid "Unauthorized."
+msgstr "Không được phép."
+
+#: admin/partials/uwsmq-admin-advanced.php:63
+msgid "Use External Cron?"
+msgstr "Sử dụng Cron ngoài?"
+
+#: admin/partials/uwsmq-admin-settings.php:35
+msgid "Use SMTP authentication"
+msgstr "Sử dụng xác thực SMTP"
+
+#: admin/partials/uwsmq-admin-settings.php:39
+msgid "Username"
+msgstr "Tên người dùng"
+
+#: includes/class-uwsmq-core.php:86
+msgid "UWSMQ Interval"
+msgstr "Khoảng thời gian UWSMQ"
+
+#: admin/partials/uwsmq-email-monitor.php:98
+msgid "View"
+msgstr "Xem"
+
+#: admin/partials/uwsmq-admin-advanced.php:38
+msgid ""
+"When enabled, WordPress will not send emails immediately. Instead, they will "
+"be saved to the database and sent in chunks via WP-Cron."
+msgstr ""
+"Khi được bật, WordPress sẽ không gửi email ngay lập tức. Thay vào đó, chúng "
+"sẽ được lưu vào cơ sở dữ liệu và gửi theo từng đợt thông qua WP-Cron."

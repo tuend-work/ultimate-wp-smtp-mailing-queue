@@ -1,0 +1,350 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ultimate WP SMTP Mailing Queue\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-09 12:29+0000\n"
+"PO-Revision-Date: 2026-04-09 12:29+0000\n"
+"Last-Translator: admin\n"
+"Language-Team: Tiếng Việt\n"
+"Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.8.3; wp-6.9.4; php-8.2.27\n"
+"X-Domain: ultimate-wp-smtp-mailing-queue"
+
+#. Description of the plugin
+msgid ""
+"A professional SMTP mailing queue plugin for WordPress. Reliable delivery, "
+"batch processing, and premium admin UI."
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:59
+msgid "Actions"
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:65
+msgid "Advanced Settings"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:41
+msgid "Apply"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:32
+msgid "Authentication"
+msgstr ""
+
+#: includes/class-uwsmq-updater.php:30
+msgid "AUTO-UPDATE FROM GITHUB NOW"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:42
+msgid "Batch Size"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:15
+msgid "Bcc email addresses"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:37
+msgid "Bulk actions"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:8
+msgid "Cc email addresses"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:30
+msgid "Configure how emails are queued and processed by the system."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:79
+msgid "Cron Interval (seconds)"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:4
+msgid "Cron Status:"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:37
+msgid "Defer email sending to background queue"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:102
+msgid "Delete"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:39
+msgid "Delete selected"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:54
+msgid "Email address that emails will appear to come from."
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:2
+msgid "Email Monitor"
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:67
+msgid "Email Queue Monitor"
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:230
+msgid "Email sent/queued successfully!"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:34
+msgid "Enable Queue"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:22
+msgid "Encryption"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:6
+msgid ""
+"Enter your SMTP server details to route all WordPress emails through this "
+"account."
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:232
+msgid "Failed to send email."
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:53
+msgid "From"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:51
+msgid "From Email"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:58
+msgid "From Name"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://antigravity.google"
+msgstr ""
+
+#. URI of the plugin
+msgid "https://example.com/ultimate-wp-smtp-mailing-queue"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:49
+msgid "Log Limit"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:52
+msgid ""
+"Maximum number of log entries to retain. Older logs will be deleted "
+"automatically."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:26
+msgid "Message"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:11
+#: admin/partials/uwsmq-admin-tools-test.php:18
+msgid "Multiple addresses can be added separated by comma."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:61
+msgid "Name that emails will appear to come from."
+msgstr ""
+
+#. Author of the plugin
+msgid "Nguyễn Đức Tuệ"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:65
+msgid "No email logs found."
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:278
+msgid "No items selected."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:27
+msgid "None"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:45
+msgid "Number of emails to send in each interval."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:45
+msgid "Password"
+msgstr ""
+
+#: includes/class-uwsmq-updater.php:96
+msgid "Plugin updated successfully from GitHub!"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:6
+msgid "Process All Queue"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:29
+msgid "Queue & CRON Settings"
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:247
+msgid "Queue processed successfully."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:6
+msgid "Reschedule Cron"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:87
+msgid "Save Advanced Settings"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:67
+msgid "Save Settings"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:56
+msgid "Secret Key"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:100
+msgid "Send"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:34
+msgid "Send directly without waiting for cronjob to process queue"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:30
+msgid "Send now?"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:38
+msgid "Send selected"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:40
+msgid "Send Test Email"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:57
+msgid "Sent At"
+msgstr ""
+
+#: ultimate-wp-smtp-mailing-queue.php:58 includes/class-uwsmq-admin.php:38
+#: includes/class-uwsmq-admin.php:39
+msgid "Settings"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:67
+msgid "Setup this cronjob to VPS / Hosting if WP_CRON is disabled."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:5
+msgid "SMTP Configuration"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:10
+msgid "SMTP Host"
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:27 includes/class-uwsmq-admin.php:73
+msgid "SMTP Mailing Queue"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:16
+msgid "SMTP Port"
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:28
+msgid "SMTP Queue"
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:64
+msgid "SMTP Settings"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:58
+msgid "Source"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:56
+msgid "Status"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:22
+#: admin/partials/uwsmq-email-monitor.php:55
+msgid "Subject"
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:66
+msgid "Test Email"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:82
+msgid ""
+"The interval in seconds to process the queue when using wp_cron. Default is "
+"300 (5 minutes)."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:59
+msgid ""
+"This key is needed to start processing the queue manually or via cronjob."
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:54
+msgid "To"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-tools-test.php:4
+msgid "To email address"
+msgstr ""
+
+#. Name of the plugin
+msgid "Ultimate WP SMTP Mailing Queue"
+msgstr ""
+
+#: includes/class-uwsmq-updater.php:25
+msgid "Ultimate WP SMTP Mailing Queue Auto-Updater"
+msgstr ""
+
+#: includes/class-uwsmq-updater.php:43
+msgid "Unauthorized action."
+msgstr ""
+
+#: includes/class-uwsmq-admin.php:198
+msgid "Unauthorized."
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:63
+msgid "Use External Cron?"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:35
+msgid "Use SMTP authentication"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-settings.php:39
+msgid "Username"
+msgstr ""
+
+#: includes/class-uwsmq-core.php:86
+msgid "UWSMQ Interval"
+msgstr ""
+
+#: admin/partials/uwsmq-email-monitor.php:98
+msgid "View"
+msgstr ""
+
+#: admin/partials/uwsmq-admin-advanced.php:38
+msgid ""
+"When enabled, WordPress will not send emails immediately. Instead, they will "
+"be saved to the database and sent in chunks via WP-Cron."
+msgstr ""
