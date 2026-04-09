@@ -51,7 +51,12 @@ class UWSMQ_Logs {
 			)
 		);
 
-		return $result ? $wpdb->insert_id : false;
+		if ( ! $result ) {
+			error_log( 'UWSMQ Log Insert Error: ' . $wpdb->last_error );
+			return false;
+		}
+
+		return $wpdb->insert_id;
 	}
 
 	public static function update_log_status( $id, $status, $error = '', $sent_at = null ) {
