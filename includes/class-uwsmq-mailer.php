@@ -168,10 +168,10 @@ class UWSMQ_Mailer {
 			}
 
 			$result = $phpmailer->send();
-			if ( ! $this->is_processing ) {
-				UWSMQ_Logs::add_log( $to, $subject, $result ? 'sent' : 'failed', $result ? '' : $phpmailer->ErrorInfo, 'direct' );
+			if ( ! $result ) {
+				$phpmailer_error = $phpmailer->ErrorInfo;
 			}
-			return $result;
+
 		} catch ( Exception $e ) {
 			global $phpmailer_error;
 			$phpmailer_error = $e->getMessage();

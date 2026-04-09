@@ -182,7 +182,7 @@ class UWSMQ_Admin {
 		$bcc = sanitize_text_field( $_POST['test_bcc'] );
 		$subject = sanitize_text_field( $_POST['test_subject'] );
 		$message = wp_kses_post( $_POST['test_message'] );
-		$direct = isset( $_POST['test_direct'] ) && $_POST['test_direct'] === 'true';
+		$direct = ! empty( $_POST['test_direct'] );
 
 		$headers = array();
 		if ( ! empty( $cc ) ) $headers[] = 'Cc: ' . $cc;

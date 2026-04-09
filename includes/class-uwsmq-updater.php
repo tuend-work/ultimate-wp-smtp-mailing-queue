@@ -14,8 +14,7 @@ class UWSMQ_Updater {
 
 	public function render_update_button() {
 		$screen = get_current_screen();
-		// The page slug for add_options_page is 'settings_page_ultimate-wp-smtp-mailing-queue'
-		if ( 'settings_page_ultimate-wp-smtp-mailing-queue' !== $screen->id ) {
+		if ( 'toplevel_page_ultimate-wp-smtp-mailing-queue' !== $screen->id ) {
 			return;
 		}
 
