@@ -150,28 +150,20 @@ class UWSMQ_Admin {
 		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-tools.php';
 	}
 
-	private function display_supervisors_page() {
-		$subtabs = array(
-			'processing' => 'Processing',
-			'list'       => 'List Queue',
-			'errors'     => 'Sending Errors',
-			'sent'       => 'Sent'
-		);
-		$current_subtab = $this->current_subtab;
-		
+	private function display_email_monitor_page() {
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'uwsmq_queue';
-		$items = array();
+		$table_name = $wpdb->prefix . 'uwsmq_logs';
+		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : '';
 		
-		if ( $current_subtab === 'list' ) {
-			$items = $wpdb->get_results( "SELECT * FROM $table_name WHERE status = 'pending' ORDER BY created_at DESC" );
-		} elseif ( $current_subtab === 'errors' ) {
-			$items = $wpdb->get_results( "SELECT * FROM $table_name WHERE status = 'failed' ORDER BY created_at DESC" );
-		} elseif ( $current_subtab === 'sent' ) {
-			$items = $wpdb->get_results( "SELECT * FROM $table_name WHERE status = 'sent' ORDER BY sent_at DESC LIMIT 100" );
+		$sql = "SELECT * FROM $table_name";
+		if ( ! empty( $status_filter ) && $status_filter !== 'all' ) {
+			$sql .= $wpdb->prepare( " WHERE status = %s", $status_filter );
 		}
+		$sql .= " ORDER BY sent_at DESC";
+		
+		$items = $wpdb->get_results( $sql );
 
-		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-supervisors.php';
+		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-email-monitor.php';
 	}
 
 	public function ajax_test_smtp() {
