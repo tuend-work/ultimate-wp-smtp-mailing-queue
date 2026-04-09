@@ -63,22 +63,8 @@
             </tr>
         </table>
 
-        <div class="uwsmq-submit-wrap" style="display: flex; align-items: center; gap: 15px; margin-top: 20px;">
-            <?php submit_button( 'Save Settings', 'primary', 'uwsmq_save_settings', false ); ?>
-            <button type="button" id="uwsmq-test-btn" class="button">Send Test Email</button>
+        <div class="uwsmq-submit-wrap" style="margin-top: 20px;">
+            <?php submit_button( 'Save Settings', 'primary', 'uwsmq_save_settings' ); ?>
         </div>
     </form>
-</div>
-
-<!-- Test SMTP Modal -->
-<div id="uwsmq-test-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
-    <div style="background:white; padding: 30px; border-radius: 8px; width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-        <h2 style="margin-top:0;">Test SMTP Setup</h2>
-        <p>Enter an email address to send a test message.</p>
-        <input type="text" id="uwsmq-test-email" class="widefat" placeholder="recipient@example.com" style="margin-bottom: 20px; padding: 10px;">
-        <div style="text-align: right;">
-            <button id="uwsmq-cancel-test" class="button">Cancel</button>
-            <button id="uwsmq-send-test" class="button button-primary">Send Test</button>
-        </div>
-    </div>
 </div>

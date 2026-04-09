@@ -138,14 +138,14 @@ class UWSMQ_Admin {
 		$new_settings = $old_settings;
 
 		if ( $this->current_tab === 'settings' ) {
-			$new_settings['smtp_host']   = sanitize_text_field( $_POST['smtp_host'] );
-			$new_settings['smtp_port']   = sanitize_text_field( $_POST['smtp_port'] );
+			$new_settings['smtp_host']   = sanitize_text_field( trim( $_POST['smtp_host'] ) );
+			$new_settings['smtp_port']   = sanitize_text_field( trim( $_POST['smtp_port'] ) );
 			$new_settings['smtp_auth']   = isset( $_POST['smtp_auth'] ) ? 'yes' : 'no';
-			$new_settings['smtp_user']   = sanitize_text_field( $_POST['smtp_user'] );
-			$new_settings['smtp_pass']   = sanitize_text_field( $_POST['smtp_pass'] );
-			$new_settings['smtp_secure'] = sanitize_text_field( $_POST['smtp_secure'] );
-			$new_settings['from_email']  = sanitize_email( $_POST['from_email'] );
-			$new_settings['from_name']   = sanitize_text_field( $_POST['from_name'] );
+			$new_settings['smtp_user']   = sanitize_text_field( trim( $_POST['smtp_user'] ) );
+			$new_settings['smtp_pass']   = sanitize_text_field( trim( $_POST['smtp_pass'] ) );
+			$new_settings['smtp_secure'] = sanitize_text_field( trim( $_POST['smtp_secure'] ) );
+			$new_settings['from_email']  = sanitize_email( trim( $_POST['from_email'] ) );
+			$new_settings['from_name']   = sanitize_text_field( trim( $_POST['from_name'] ) );
 		} elseif ( $this->current_tab === 'advanced' ) {
 			$new_settings['enable_queue']   = isset( $_POST['enable_queue'] ) ? 'yes' : 'no';
 			$new_settings['dont_use_wpcron'] = isset( $_POST['dont_use_wpcron'] ) ? 'yes' : 'no';
