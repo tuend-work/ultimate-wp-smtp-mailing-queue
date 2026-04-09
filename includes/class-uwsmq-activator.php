@@ -30,11 +30,13 @@ class UWSMQ_Activator {
 		$table_logs = $wpdb->prefix . 'uwsmq_logs';
 		$sql_logs = "CREATE TABLE $table_logs (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
+			from_email varchar(100) DEFAULT '' NOT NULL,
 			to_email text NOT NULL,
 			subject text NOT NULL,
+			headers longtext DEFAULT '' NOT NULL,
 			status varchar(20) NOT NULL,
 			error_message text DEFAULT '' NOT NULL,
-			sent_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+			sent_at datetime DEFAULT NULL,
 			source varchar(20) DEFAULT 'direct' NOT NULL,
 			PRIMARY KEY  (id)
 		) $charset_collate;";

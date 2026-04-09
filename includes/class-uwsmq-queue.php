@@ -7,7 +7,7 @@ class UWSMQ_Queue {
 
 		$stored_attachments = UWSMQ_Attachments::store_attachments( $attachments );
 
-		return $wpdb->insert(
+		$result = $wpdb->insert(
 			$wpdb->prefix . 'uwsmq_queue',
 			array(
 				'to_email'    => is_array( $to ) ? implode( ',', $to ) : $to,
@@ -19,6 +19,12 @@ class UWSMQ_Queue {
 				'created_at'  => current_time( 'mysql' ),
 			)
 		);
+
+		if ( $result ) {
+			UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers );
+		}
+
+		return $result;
 	}
 
 	public static function get_pending_items( $limit = 10 ) {

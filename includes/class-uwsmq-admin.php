@@ -11,7 +11,7 @@ class UWSMQ_Admin {
 		
 		// Set default subtabs
 		if ( empty( $this->current_subtab ) ) {
-			if ( $this->current_tab === 'tools' ) {
+			if ( $this->current_tab === 'test-email' ) {
 				$this->current_subtab = 'test';
 			} elseif ( $this->current_tab === 'supervisors' ) {
 				$this->current_subtab = 'processing';
@@ -69,7 +69,7 @@ class UWSMQ_Admin {
 		$tabs = array(
 			'settings'    => 'SMTP Settings',
 			'advanced'    => 'Advanced Settings',
-			'tools'       => 'Tools',
+			'test-email'  => 'Test Email',
 			'email-monitor' => 'Email Monitor'
 		);
 
@@ -95,11 +95,13 @@ class UWSMQ_Admin {
 			case 'advanced':
 				include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-advanced.php';
 				break;
-			case 'tools':
+			case 'test-email':
 				$this->display_tools_page();
 				break;
 			case 'email-monitor':
-				$this->display_email_monitor_page();
+				$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
+				$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron ) : 'Not scheduled';
+				$this->display_email_monitor_page( $cron_status );
 				break;
 			case 'settings':
 			default:
@@ -109,6 +111,7 @@ class UWSMQ_Admin {
 		echo '</div>';
 		echo '</div>';
 	}
+
 
 	private function save_settings() {
 		$old_settings = get_option( 'uwsmq_settings' );
@@ -150,7 +153,7 @@ class UWSMQ_Admin {
 		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-tools.php';
 	}
 
-	private function display_email_monitor_page() {
+	private function display_email_monitor_page( $cron_status = '' ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'uwsmq_logs';
 		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : '';
@@ -195,11 +198,11 @@ class UWSMQ_Admin {
 
 		global $phpmailer_error;
 		if ( $result ) {
-			UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct' );
+			UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers );
 			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );
 		} else {
 			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : 'Failed to send email.';
-			UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct' );
+			UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers );
 			wp_send_json_error( array( 'message' => $error_msg ) );
 		}
 	}
@@ -215,6 +218,14 @@ class UWSMQ_Admin {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
 		$id = (int)$_POST['id'];
 		UWSMQ_Queue::delete_item( $id );
+		wp_send_json_success();
+	}
+
+	public function ajax_delete_log() {
+		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
+		$id = (int)$_POST['id'];
+		global $wpdb;
+		$wpdb->delete( $wpdb->prefix . 'uwsmq_logs', array( 'id' => $id ) );
 		wp_send_json_success();
 	}
 

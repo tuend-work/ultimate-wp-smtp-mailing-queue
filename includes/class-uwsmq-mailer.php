@@ -86,11 +86,11 @@ class UWSMQ_Mailer {
 
 			if ( $result ) {
 				UWSMQ_Queue::update_status( $item->id, 'sent', '', $item->attempts + 1 );
-				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'sent', '', 'queue' );
+				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'sent', '', 'queue', '', $headers );
 			} else {
 				global $phpmailer_error;
 				UWSMQ_Queue::update_status( $item->id, 'failed', $phpmailer_error, $item->attempts + 1 );
-				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'failed', $phpmailer_error, 'queue' );
+				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'failed', $phpmailer_error, 'queue', '', $headers );
 			}
 		}
 
@@ -181,7 +181,7 @@ class UWSMQ_Mailer {
 			global $phpmailer_error;
 			$phpmailer_error = $e->getMessage();
 			if ( ! $this->is_processing ) {
-				UWSMQ_Logs::add_log( $to, $subject, 'failed', $phpmailer_error, 'direct' );
+				UWSMQ_Logs::add_log( $to, $subject, 'failed', $phpmailer_error, 'direct', '', $headers );
 			}
 			return false;
 		}
