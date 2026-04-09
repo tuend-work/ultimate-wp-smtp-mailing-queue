@@ -178,7 +178,7 @@ class UWSMQ_Admin {
 		if ( ! empty( $status_filter ) && $status_filter !== 'all' ) {
 			$sql .= $wpdb->prepare( " WHERE status = %s", $status_filter );
 		}
-		$sql .= " ORDER BY sent_at DESC";
+		$sql .= " ORDER BY id DESC";
 		
 		$items = $wpdb->get_results( $sql );
 
@@ -308,7 +308,7 @@ class UWSMQ_Admin {
 	public function display_logs_page() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'uwsmq_logs';
-		$items = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY sent_at DESC LIMIT 100" );
+		$items = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC LIMIT 100" );
 		
 		echo '<div class="wrap">';
 		echo '<h1>Email Logs</h1>';
