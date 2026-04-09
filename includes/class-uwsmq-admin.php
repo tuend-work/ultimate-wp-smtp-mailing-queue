@@ -60,7 +60,7 @@ class UWSMQ_Admin {
 			'settings'      => 'SMTP Settings',
 			'advanced'      => 'Advanced Settings',
 			'test-email'    => 'Test Email',
-			'email-monitor' => 'Email Monitor'
+			'email-monitor' => 'Email Queue Monitor'
 		);
 
 		$settings = get_option( 'uwsmq_settings' );
