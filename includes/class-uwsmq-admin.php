@@ -200,11 +200,17 @@ class UWSMQ_Admin {
 
 		global $phpmailer_error;
 		if ( $result ) {
-			UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers, $message );
+			// Only log here if it was a direct send. If it was queued, UWSMQ_Queue::add_to_queue already logged it.
+			if ( $direct ) {
+				UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers, $message );
+			}
 			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );
 		} else {
 			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : 'Failed to send email.';
-			UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers, $message );
+			// Only log error here if direct. Queue errors are logged in handle_wp_mail/mailer.
+			if ( $direct ) {
+				UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers, $message );
+			}
 			wp_send_json_error( array( 'message' => $error_msg ) );
 		}
 	}
