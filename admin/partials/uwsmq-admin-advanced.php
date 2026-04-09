@@ -69,8 +69,7 @@
                     <?php 
                     $cron_url = add_query_arg( array(
                         'smqProcessQueue' => '',
-                        'key' => $settings['secret_key'],
-                        'time' => time()
+                        'key' => $settings['secret_key']
                     ), home_url( '/' ) );
                     ?>
                     <p class="description"><code>* * * * * wget -q -O - <?php echo esc_url( $cron_url ); ?> >/dev/null 2>&1</code></p>
