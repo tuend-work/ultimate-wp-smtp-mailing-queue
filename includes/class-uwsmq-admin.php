@@ -112,7 +112,7 @@ class UWSMQ_Admin {
 					}
 				}
 
-				$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron ) : ( $dont_use_cron ? 'External Cron Managed' : 'Not scheduled' );
+				$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) : ( $dont_use_cron ? 'External Cron Managed' : 'Not scheduled' );
 				$this->display_email_monitor_page( $cron_status );
 				break;
 			case 'settings':

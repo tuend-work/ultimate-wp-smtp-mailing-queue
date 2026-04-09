@@ -35,7 +35,7 @@ class UWSMQ_Logs {
 			$from = ! empty( $settings['smtp_user'] ) ? $settings['smtp_user'] : ( isset( $settings['from_email'] ) ? $settings['from_email'] : '' );
 		}
 
-		$wpdb->insert(
+		$result = $wpdb->insert(
 			$wpdb->prefix . 'uwsmq_logs',
 			array(
 				'from_email'    => $from,
@@ -46,9 +46,28 @@ class UWSMQ_Logs {
 				'status'        => $status,
 				'error_message' => $error,
 				'queued_at'     => $queued_at,
-				'sent_at'       => current_time( 'mysql' ),
+				'sent_at'       => ( $status === 'sent' ) ? current_time( 'mysql' ) : null,
 				'source'        => $source
 			)
+		);
+
+		return $result ? $wpdb->insert_id : false;
+	}
+
+	public static function update_log_status( $id, $status, $error = '', $sent_at = null ) {
+		global $wpdb;
+		$data = array( 'status' => $status );
+		if ( ! empty( $error ) ) $data['error_message'] = $error;
+		if ( $sent_at ) {
+			$data['sent_at'] = $sent_at;
+		} elseif ( $status === 'sent' ) {
+			$data['sent_at'] = current_time( 'mysql' );
+		}
+
+		return $wpdb->update(
+			$wpdb->prefix . 'uwsmq_logs',
+			$data,
+			array( 'id' => $id )
 		);
 	}
 }

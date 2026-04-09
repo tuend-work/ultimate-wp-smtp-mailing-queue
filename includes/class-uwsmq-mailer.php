@@ -36,8 +36,11 @@ class UWSMQ_Mailer {
 		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
 		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
 
-		// Add to queue
-		UWSMQ_Queue::add_to_queue( $to, $subject, $message, $headers, $attachments );
+		// Create Log entry first to get ID
+		$log_id = UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers, $message, current_time( 'mysql' ) );
+
+		// Add to queue with log_id
+		UWSMQ_Queue::add_to_queue( $to, $subject, $message, $headers, $attachments, $log_id );
 		
 		return true;
 	}
@@ -63,11 +66,6 @@ class UWSMQ_Mailer {
 	private function original_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
 		// This uses the built-in PHPMailer via the phpmailer_init hook which we already set up.
 		require_once ABSPATH . WPINC . '/pluggable.php';
-		// Note: Since we are in the wp_mail override, we might need to manually trigger the PHPMailer flow
-		// if we were trying to avoid calling wp_mail again. But actually, since we set $is_processing = true,
-		// calling the global wp_mail (which would be us) is not ideal if it's already defined.
-		// However, WordPress's pluggable.php uses `if ( ! function_exists( 'wp_mail' ) )`.
-		// If we are here, we ARE wp_mail. So we need to use PHPMailer directly.
 		return $this->send_with_phpmailer( $to, $subject, $message, $headers, $attachments );
 	}
 
@@ -142,11 +140,21 @@ class UWSMQ_Mailer {
 
 		if ( $result ) {
 			UWSMQ_Queue::update_status( $item->id, 'sent', '', $item->attempts + 1 );
-			UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'sent', '', 'queue', '', $headers, $item->message, $item->created_at );
+			if ( $item->log_id ) {
+				UWSMQ_Logs::update_log_status( $item->log_id, 'sent' );
+			} else {
+				// Fallback for old items
+				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'sent', '', 'queue', '', $headers, $item->message, $item->created_at );
+			}
 		} else {
 			global $phpmailer_error;
 			UWSMQ_Queue::update_status( $item->id, 'failed', $phpmailer_error, $item->attempts + 1 );
-			UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'failed', $phpmailer_error, 'queue', '', $headers, $item->message, $item->created_at );
+			if ( $item->log_id ) {
+				UWSMQ_Logs::update_log_status( $item->log_id, 'failed', $phpmailer_error );
+			} else {
+				// Fallback for old items
+				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'failed', $phpmailer_error, 'queue', '', $headers, $item->message, $item->created_at );
+			}
 		}
 	}
 

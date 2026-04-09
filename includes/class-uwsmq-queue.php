@@ -2,7 +2,7 @@
 
 class UWSMQ_Queue {
 
-	public static function add_to_queue( $to, $subject, $message, $headers, $attachments ) {
+	public static function add_to_queue( $to, $subject, $message, $headers, $attachments, $log_id = null ) {
 		global $wpdb;
 
 		$stored_attachments = UWSMQ_Attachments::store_attachments( $attachments );
@@ -10,6 +10,7 @@ class UWSMQ_Queue {
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'uwsmq_queue',
 			array(
+				'log_id'      => $log_id,
 				'to_email'    => is_array( $to ) ? implode( ',', $to ) : $to,
 				'subject'     => $subject,
 				'message'     => $message,
