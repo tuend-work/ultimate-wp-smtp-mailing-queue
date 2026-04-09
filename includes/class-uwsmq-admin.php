@@ -172,15 +172,14 @@ class UWSMQ_Admin {
 		$mailer = UWSMQ_Mailer::get_instance();
 		
 		if ( $direct ) {
-			// Temporarily disable queue for this send
-			add_filter( 'pre_option_uwsmq_settings', function( $val ) {
-				$settings = get_option( 'uwsmq_settings' );
-				$settings['enable_queue'] = 'no';
-				return $settings;
-			} );
+			$mailer->force_direct_send( true );
 		}
 
 		$result = wp_mail( $to, $subject, $message, $headers );
+		
+		if ( $direct ) {
+			$mailer->force_direct_send( false );
+		}
 
 		if ( $result ) {
 			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );

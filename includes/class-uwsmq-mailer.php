@@ -4,6 +4,7 @@ class UWSMQ_Mailer {
 
 	private static $instance = null;
 	private $is_processing = false;
+	private $force_direct = false;
 
 	public static function get_instance() {
 		if ( self::$instance == null ) {
@@ -12,11 +13,15 @@ class UWSMQ_Mailer {
 		return self::$instance;
 	}
 
+	public function force_direct_send( $force = true ) {
+		$this->force_direct = $force;
+	}
+
 	public function handle_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
 		$settings = get_option( 'uwsmq_settings' );
 
-		// If we are currently processing the queue, don't re-queue (avoid infinite loops)
-		if ( $this->is_processing || ( isset( $settings['enable_queue'] ) && $settings['enable_queue'] !== 'yes' ) ) {
+		// If we are currently processing the queue, or forced direct, don't re-queue
+		if ( $this->is_processing || $this->force_direct || ( isset( $settings['enable_queue'] ) && $settings['enable_queue'] !== 'yes' ) ) {
 			return $this->original_wp_mail( $to, $subject, $message, $headers, $attachments );
 		}
 
