@@ -150,7 +150,7 @@ class UWSMQ_Admin {
 			$new_settings['interval']        = isset( $_POST['interval'] ) ? absint( $_POST['interval'] ) : 300;
 			$new_settings['secret_key']      = sanitize_text_field( wp_unslash( $_POST['secret_key'] ?? '' ) );
 			$new_settings['log_limit']       = isset( $_POST['log_limit'] ) ? absint( $_POST['log_limit'] ) : 1000;
-			
+
 			update_option( 'uwsmq_settings', $new_settings );
 
 			if ( $old_settings['interval'] != $new_settings['interval'] || $old_settings['dont_use_wpcron'] != $new_settings['dont_use_wpcron'] ) {
@@ -159,10 +159,17 @@ class UWSMQ_Admin {
 					wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
 				}
 			}
-			return; // Already saved above
 		}
 
 		update_option( 'uwsmq_settings', $new_settings );
+
+		// PRG Pattern: Redirect back to prevent resubmission & "headers already sent"
+		$redirect_url = add_query_arg(
+			array( 'page' => 'ultimate-wp-smtp-mailing-queue', 'tab' => $this->current_tab, 'settings-updated' => 'true' ),
+			admin_url( 'admin.php' )
+		);
+		wp_safe_redirect( $redirect_url );
+		exit;
 	}
 
 	private function display_tools_page() {

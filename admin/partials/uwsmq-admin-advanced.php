@@ -72,7 +72,7 @@
                         'key' => $settings['secret_key']
                     ), home_url( '/' ) );
                     ?>
-                    <p class="description"><code>* * * * * wget -q -O - <?php echo esc_url( $cron_url ); ?> >/dev/null 2>&1</code></p>
+                    <p class="description"><code>* * * * * wget -q -O - "<?php echo esc_url( $cron_url ); ?>" >/dev/null 2>&1</code></p>
                 </td>
             </tr>
             <tr>

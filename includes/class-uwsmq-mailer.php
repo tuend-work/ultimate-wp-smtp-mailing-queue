@@ -106,6 +106,9 @@ class UWSMQ_Mailer {
 			$this->process_single_item( $item );
 		}
 
+		// Rotate logs after batch processing
+		UWSMQ_Logs::rotate_logs();
+
 		$this->is_processing = false;
 	}
 

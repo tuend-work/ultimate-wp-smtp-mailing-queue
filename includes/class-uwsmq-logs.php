@@ -10,18 +10,19 @@ class UWSMQ_Logs {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'uwsmq_logs';
 		$settings = get_option( 'uwsmq_settings' );
-		$limit = isset( $settings['log_limit'] ) ? (int)$settings['log_limit'] : 1000;
+		$limit = isset( $settings['log_limit'] ) ? (int) $settings['log_limit'] : 1000;
 
 		if ( $limit <= 0 ) {
 			return;
 		}
 
-		$count = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+		// Only count completed logs (sent/failed), never delete pending queue items
+		$count = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE status IN ('sent', 'failed')" );
 
 		if ( $count > $limit ) {
 			$to_delete = $count - $limit;
 			$wpdb->query( $wpdb->prepare( 
-				"DELETE FROM $table_name ORDER BY sent_at ASC LIMIT %d", 
+				"DELETE FROM $table_name WHERE status IN ('sent', 'failed') ORDER BY id ASC LIMIT %d", 
 				$to_delete 
 			) );
 		}
