@@ -33,11 +33,13 @@ class UWSMQ_Core {
 		add_action( 'wp_ajax_uwsmq_test_smtp', array( $admin, 'ajax_test_smtp' ) );
 		add_action( 'wp_ajax_uwsmq_delete_log', array( $admin, 'ajax_delete_log' ) );
 		add_action( 'wp_ajax_uwsmq_bulk_action', array( $admin, 'ajax_bulk_action' ) );
+		add_action( 'wp_ajax_uwsmq_refresh_cron', array( $admin, 'ajax_refresh_cron' ) );
 		add_action( 'wp_ajax_uwsmq_process_queue', array( $admin, 'ajax_process_queue' ) );
 		add_action( 'wp_ajax_uwsmq_delete_item', array( $admin, 'ajax_delete_item' ) );
 	}
 
 	private function define_public_hooks() {
+		add_action( 'init', array( $this, 'heartbeat' ) );
 		add_action( 'init', array( $this, 'check_external_process' ) );
 		add_filter( 'cron_schedules', array( $this, 'add_cron_intervals' ) );
 		add_action( 'uwsmq_process_queue_cron', array( $this, 'process_queue' ) );
@@ -47,6 +49,23 @@ class UWSMQ_Core {
 		$mailer = UWSMQ_Mailer::get_instance();
 		add_filter( 'pre_wp_mail', array( $mailer, 'pre_wp_mail_filter' ), 10, 2 );
 		add_action( 'phpmailer_init', array( $mailer, 'init_smtp' ) );
+	}
+
+	public function heartbeat() {
+		// Only run if not an AJAX request and not a cron request to avoid overlap
+		if ( wp_doing_ajax() || wp_doing_cron() ) {
+			return;
+		}
+
+		$settings = get_option( 'uwsmq_settings' );
+		$interval = isset( $settings['interval'] ) ? (int)$settings['interval'] : 300;
+		$last_run = get_transient( 'uwsmq_last_heartbeat_run' );
+
+		if ( false === $last_run ) {
+			// Trigger processing in background (non-blocking)
+			$this->process_queue();
+			set_transient( 'uwsmq_last_heartbeat_run', time(), $interval );
+		}
 	}
 
 	public function add_cron_intervals( $schedules ) {
@@ -79,6 +98,8 @@ class UWSMQ_Core {
 			header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 			header("Cache-Control: post-check=0, pre-check=0", false);
 			header("Pragma: no-cache");
+
+			update_option( 'uwsmq_last_external_run', time() );
 
 			$this->process_queue();
 			echo 'UWSMQ Queue processed at ' . current_time('mysql');

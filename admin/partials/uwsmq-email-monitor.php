@@ -5,6 +5,7 @@
         <div>
             <strong>Next Cron Schedule:</strong> 
             <span class="uwsmq-cron-time" style="color: #2271b1;"><?php echo esc_html( $cron_status ); ?></span>
+            <button id="uwsmq-refresh-cron" class="button" title="Reschedule Cron" style="padding: 0 5px; margin-left: 5px; height: 26px; line-height: 24px;">🔄</button>
         </div>
         <div>
             <button id="uwsmq-process-all-queue" class="button button-primary">Process All Queue</button>
@@ -166,6 +167,18 @@ jQuery(document).ready(function($){
     // Select All
     $('#cb-select-all-1').on('change', function(){
         $('input[name="log_ids[]"]').prop('checked', $(this).prop('checked'));
+    });
+
+    // Refresh Cron
+    $('#uwsmq-refresh-cron').on('click', function(){
+        var btn = $(this);
+        btn.prop('disabled', true).text('...');
+        $.post(uwsmq_ajax.ajax_url, {
+            action: 'uwsmq_refresh_cron',
+            nonce: uwsmq_ajax.nonce
+        }, function(response) {
+            location.reload();
+        });
     });
 
     // Bulk Actions

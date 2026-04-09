@@ -110,9 +110,11 @@ class UWSMQ_Admin {
 						wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
 						$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
 					}
+					$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) : 'Not scheduled';
+				} else {
+					$last_ext = get_option( 'uwsmq_last_external_run' );
+					$cron_status = $last_ext ? 'External Cron Active (Last run: ' . date_i18n( 'Y-m-d H:i:s', $last_ext + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) . ')' : 'External Cron Managed (Waiting for first run)';
 				}
-
-				$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) : ( $dont_use_cron ? 'External Cron Managed' : 'Not scheduled' );
 				$this->display_email_monitor_page( $cron_status );
 				break;
 			case 'settings':
@@ -272,6 +274,13 @@ class UWSMQ_Admin {
 			$mailer->process_bulk_items( $ids );
 		}
 
+		wp_send_json_success();
+	}
+
+	public function ajax_refresh_cron() {
+		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
+		wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
+		wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
 		wp_send_json_success();
 	}
 
