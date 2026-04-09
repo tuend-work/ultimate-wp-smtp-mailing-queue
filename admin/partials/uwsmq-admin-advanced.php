@@ -60,11 +60,11 @@
                 </td>
             </tr>
             <tr>
-                <th scope="row">Don't use wp_cron</th>
+                <th scope="row">Use External Cron?</th>
                 <td>
                     <label>
                         <input name="dont_use_wpcron" type="checkbox" id="dont_use_wpcron" value="yes" <?php checked( $settings['dont_use_wpcron'], 'yes' ); ?>>
-                        Use a real cronjob instead of wp_cron.
+                        Setup this external cronjob if WP_CRON is disabled.
                     </label>
                     <?php 
                     $cron_url = add_query_arg( array(

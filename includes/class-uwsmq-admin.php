@@ -89,45 +89,37 @@ class UWSMQ_Admin {
 			case 'test-email':
 				$this->display_tools_page();
 				break;
-			case 'email-monitor':
-				$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
-				$settings = get_option( 'uwsmq_settings' );
-				$dont_use_cron = isset( $settings['dont_use_wpcron'] ) && $settings['dont_use_wpcron'] === 'yes';
+		// Pre-calculate cron status for all settings tabs
+		$next_cron    = wp_next_scheduled( 'uwsmq_process_queue_cron' );
+		$settings     = get_option( 'uwsmq_settings' );
+		$dont_use_cron = isset( $settings['dont_use_wpcron'] ) && $settings['dont_use_wpcron'] === 'yes';
 
-				// Auto-fix: if not using external cron, and next cron is more than 5 mins in the past, or missing
-				if ( ! $dont_use_cron ) {
-					if ( ! $next_cron || $next_cron < time() - 300 ) {
-						wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
-						wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
-						$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
-					}
-					$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) : 'Not scheduled';
-				} else {
-					$last_ext = get_option( 'uwsmq_last_external_run' );
-					$cron_status = $last_ext ? 'External Cron Active (Last run: ' . date_i18n( 'Y-m-d H:i:s', $last_ext + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) . ')' : 'External Cron Managed (Waiting for first run)';
-				}
+		if ( ! $dont_use_cron ) {
+			if ( ! $next_cron || $next_cron < time() - 300 ) {
+				wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
+				wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
+				$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
+			}
+			$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) : 'Not scheduled';
+		} else {
+			$last_ext = get_option( 'uwsmq_last_external_run' );
+			$cron_status = $last_ext ? 'External Cron Active (Last run: ' . date_i18n( 'Y-m-d H:i:s', $last_ext + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) . ')' : 'External Cron Managed (Waiting for first run)';
+		}
+
+		switch ( $this->current_tab ) {
+			case 'email-monitor':
 				$this->display_email_monitor_page( $cron_status );
 				break;
+			case 'test-email':
+				$this->display_tools_page();
+				break;
 			case 'settings':
+			case 'advanced':
 			default:
-				$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
-				$settings = get_option( 'uwsmq_settings' );
-				$dont_use_cron = isset( $settings['dont_use_wpcron'] ) && $settings['dont_use_wpcron'] === 'yes';
-
-				if ( ! $dont_use_cron ) {
-					if ( ! $next_cron || $next_cron < time() - 300 ) {
-						wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
-						wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
-						$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
-					}
-					$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) : 'Not scheduled';
-				} else {
-					$last_ext = get_option( 'uwsmq_last_external_run' );
-					$cron_status = $last_ext ? 'External Cron Active (Last run: ' . date_i18n( 'Y-m-d H:i:s', $last_ext + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) . ')' : 'External Cron Managed (Waiting for first run)';
-				}
 				include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-settings.php';
 				break;
 		}
+		
 		echo '</div>';
 		echo '</div>';
 	}
