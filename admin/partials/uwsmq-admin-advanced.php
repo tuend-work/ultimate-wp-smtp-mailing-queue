@@ -13,9 +13,9 @@
             e.preventDefault();
             var btn = $(this);
             btn.prop('disabled', true).text('...');
-            $.post(ajaxurl, {
+            $.post(uwsmq_ajax.ajax_url, {
                 action: 'uwsmq_refresh_cron',
-                _ajax_nonce: '<?php echo wp_create_nonce( "uwsmq_admin_nonce" ); ?>'
+                nonce: uwsmq_ajax.nonce
             }, function(response) {
                 location.reload();
             });

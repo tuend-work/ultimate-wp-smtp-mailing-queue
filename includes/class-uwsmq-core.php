@@ -1,14 +1,17 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class UWSMQ_Core {
 
-	protected $loader;
 	protected $plugin_name;
 	protected $version;
 
 	public function __construct() {
 		$this->plugin_name = 'ultimate-wp-smtp-mailing-queue';
-		$this->version = '1.2.2';
+		$this->version = UWSMQ_VERSION;
 
 		$this->load_dependencies();
 		$this->define_admin_hooks();
@@ -52,17 +55,15 @@ class UWSMQ_Core {
 	}
 
 	public function heartbeat() {
-		// Only run if not an AJAX request and not a cron request to avoid overlap
 		if ( wp_doing_ajax() || wp_doing_cron() ) {
 			return;
 		}
 
 		$settings = get_option( 'uwsmq_settings' );
-		$interval = isset( $settings['interval'] ) ? (int)$settings['interval'] : 300;
+		$interval = isset( $settings['interval'] ) ? (int) $settings['interval'] : 300;
 		$last_run = get_transient( 'uwsmq_last_heartbeat_run' );
 
 		if ( false === $last_run ) {
-			// Trigger processing in background (non-blocking)
 			$this->process_queue();
 			set_transient( 'uwsmq_last_heartbeat_run', time(), $interval );
 		}
@@ -70,7 +71,7 @@ class UWSMQ_Core {
 
 	public function add_cron_intervals( $schedules ) {
 		$settings = get_option( 'uwsmq_settings' );
-		$interval = isset( $settings['interval'] ) ? (int)$settings['interval'] : 300;
+		$interval = isset( $settings['interval'] ) ? (int) $settings['interval'] : 300;
 		
 		$schedules['uwsmq_interval'] = array(
 			'interval' => $interval,
@@ -85,33 +86,39 @@ class UWSMQ_Core {
 	}
 
 	public function check_external_process() {
-		if ( isset( $_GET['smqProcessQueue'] ) ) {
-			$settings = get_option( 'uwsmq_settings' );
-			$key = isset( $settings['secret_key'] ) ? $settings['secret_key'] : '';
-			
-			if ( empty( $key ) || ! isset( $_GET['key'] ) || $_GET['key'] !== $key ) {
-				header('HTTP/1.0 403 Forbidden');
-				wp_die( 'Invalid process key.' );
-			}
-
-			// Prevent caching
-			header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-			header("Cache-Control: post-check=0, pre-check=0", false);
-			header("Pragma: no-cache");
-
-			update_option( 'uwsmq_last_external_run', time() );
-
-			$this->process_queue();
-			echo 'UWSMQ Queue processed at ' . current_time('mysql');
-			exit;
+		if ( ! isset( $_GET['smqProcessQueue'] ) ) {
+			return;
 		}
+
+		$settings = get_option( 'uwsmq_settings' );
+		$key = isset( $settings['secret_key'] ) ? $settings['secret_key'] : '';
+		$provided_key = isset( $_GET['key'] ) ? $_GET['key'] : '';
+		
+		if ( empty( $key ) || empty( $provided_key ) || ! hash_equals( $key, $provided_key ) ) {
+			header( 'HTTP/1.0 403 Forbidden' );
+			wp_die( 'Invalid process key.' );
+		}
+
+		// Prevent caching
+		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0' );
+		header( 'Cache-Control: post-check=0, pre-check=0', false );
+		header( 'Pragma: no-cache' );
+
+		update_option( 'uwsmq_last_external_run', time() );
+
+		$this->process_queue();
+		echo 'UWSMQ Queue processed at ' . esc_html( current_time( 'mysql' ) );
+		exit;
 	}
 
 	public function run() {
-		// Ensure database tables exist
 		if ( is_admin() ) {
-			require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-activator.php';
-			UWSMQ_Activator::activate();
+			$db_version = get_option( 'uwsmq_db_version', '0' );
+			if ( version_compare( $db_version, UWSMQ_VERSION, '<' ) ) {
+				require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-activator.php';
+				UWSMQ_Activator::activate();
+				update_option( 'uwsmq_db_version', UWSMQ_VERSION );
+			}
 		}
 	}
 }

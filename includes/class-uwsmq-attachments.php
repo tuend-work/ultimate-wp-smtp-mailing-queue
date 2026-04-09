@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class UWSMQ_Attachments {
 
 	public static function store_attachments( $attachments ) {

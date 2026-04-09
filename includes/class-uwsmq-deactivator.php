@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class UWSMQ_Deactivator {
 
 	public static function deactivate() {

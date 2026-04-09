@@ -1,5 +1,11 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+// Note: This class is deprecated since v1.2.2. The uwsmq_logs table now handles both queue and logging.
+
 class UWSMQ_Queue {
 
 	public static function add_to_queue( $to, $subject, $message, $headers, $attachments, $log_id = null ) {

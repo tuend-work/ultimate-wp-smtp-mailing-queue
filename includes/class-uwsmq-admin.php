@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class UWSMQ_Admin {
 
 	protected $current_tab;
@@ -73,8 +77,8 @@ class UWSMQ_Admin {
 
 		echo '<div class="uwsmq-tab-content" style="margin-top: 20px;">';
 
-		// 1. Pre-calculate cron status for all settings tabs
-		$next_cron    = wp_next_scheduled( 'uwsmq_process_queue_cron' );
+		// Pre-calculate cron status
+		$next_cron     = wp_next_scheduled( 'uwsmq_process_queue_cron' );
 		$dont_use_cron = isset( $settings['dont_use_wpcron'] ) && $settings['dont_use_wpcron'] === 'yes';
 
 		if ( ! $dont_use_cron ) {
@@ -86,10 +90,11 @@ class UWSMQ_Admin {
 			$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) : 'Not scheduled';
 		} else {
 			$last_ext = get_option( 'uwsmq_last_external_run' );
-			$cron_status = $last_ext ? 'External Cron Active (Last run: ' . date_i18n( 'Y-m-d H:i:s', $last_ext + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) . ')' : 'External Cron Managed (Waiting for first run)';
+			$cron_status = $last_ext
+				? 'External Cron Active (Last run: ' . date_i18n( 'Y-m-d H:i:s', $last_ext + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) . ')'
+				: 'External Cron Managed (Waiting for first run)';
 		}
 
-		// 2. Display Tab Content
 		switch ( $this->current_tab ) {
 			case 'email-monitor':
 				$this->display_email_monitor_page( $cron_status );
@@ -111,25 +116,36 @@ class UWSMQ_Admin {
 	}
 
 	private function save_settings() {
+		// Nonce verification (CSRF protection)
+		if ( ! isset( $_POST['uwsmq_save_settings_nonce'] ) ||
+		     ! wp_verify_nonce( $_POST['uwsmq_save_settings_nonce'], 'uwsmq_save_settings_action' ) ) {
+			return;
+		}
+
+		// Capability check
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		$old_settings = get_option( 'uwsmq_settings' );
 		$new_settings = $old_settings;
 
 		if ( $this->current_tab === 'settings' ) {
-			$new_settings['smtp_host']   = sanitize_text_field( trim( $_POST['smtp_host'] ) );
-			$new_settings['smtp_port']   = sanitize_text_field( trim( $_POST['smtp_port'] ) );
+			$new_settings['smtp_host']   = sanitize_text_field( trim( wp_unslash( $_POST['smtp_host'] ?? '' ) ) );
+			$new_settings['smtp_port']   = sanitize_text_field( trim( wp_unslash( $_POST['smtp_port'] ?? '587' ) ) );
 			$new_settings['smtp_auth']   = isset( $_POST['smtp_auth'] ) ? 'yes' : 'no';
-			$new_settings['smtp_user']   = sanitize_text_field( trim( $_POST['smtp_user'] ) );
-			$new_settings['smtp_pass']   = sanitize_text_field( trim( $_POST['smtp_pass'] ) );
-			$new_settings['smtp_secure'] = sanitize_text_field( trim( $_POST['smtp_secure'] ) );
-			$new_settings['from_email']  = sanitize_email( trim( $_POST['from_email'] ) );
-			$new_settings['from_name']   = sanitize_text_field( trim( $_POST['from_name'] ) );
+			$new_settings['smtp_user']   = sanitize_text_field( trim( wp_unslash( $_POST['smtp_user'] ?? '' ) ) );
+			$new_settings['smtp_pass']   = trim( wp_unslash( $_POST['smtp_pass'] ?? '' ) );
+			$new_settings['smtp_secure'] = sanitize_text_field( wp_unslash( $_POST['smtp_secure'] ?? 'tls' ) );
+			$new_settings['from_email']  = sanitize_email( trim( wp_unslash( $_POST['from_email'] ?? '' ) ) );
+			$new_settings['from_name']   = sanitize_text_field( trim( wp_unslash( $_POST['from_name'] ?? '' ) ) );
 		} elseif ( $this->current_tab === 'advanced' ) {
-			$new_settings['enable_queue']   = isset( $_POST['enable_queue'] ) ? 'yes' : 'no';
+			$new_settings['enable_queue']    = isset( $_POST['enable_queue'] ) ? 'yes' : 'no';
 			$new_settings['dont_use_wpcron'] = isset( $_POST['dont_use_wpcron'] ) ? 'yes' : 'no';
-			$new_settings['batch_size']     = (int)$_POST['batch_size'];
-			$new_settings['interval']       = (int)$_POST['interval'];
-			$new_settings['secret_key']     = sanitize_text_field( $_POST['secret_key'] );
-			$new_settings['log_limit']      = isset( $_POST['log_limit'] ) ? (int)$_POST['log_limit'] : 1000;
+			$new_settings['batch_size']      = isset( $_POST['batch_size'] ) ? absint( $_POST['batch_size'] ) : 10;
+			$new_settings['interval']        = isset( $_POST['interval'] ) ? absint( $_POST['interval'] ) : 300;
+			$new_settings['secret_key']      = sanitize_text_field( wp_unslash( $_POST['secret_key'] ?? '' ) );
+			$new_settings['log_limit']       = isset( $_POST['log_limit'] ) ? absint( $_POST['log_limit'] ) : 1000;
 			
 			update_option( 'uwsmq_settings', $new_settings );
 
@@ -139,16 +155,13 @@ class UWSMQ_Admin {
 					wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
 				}
 			}
-		} else {
-			update_option( 'uwsmq_settings', $new_settings );
+			return; // Already saved above
 		}
+
+		update_option( 'uwsmq_settings', $new_settings );
 	}
 
 	private function display_tools_page() {
-		$subtabs = array(
-			'test'    => 'Test Mail'
-		);
-		$current_subtab = $this->current_subtab;
 		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-tools.php';
 	}
 
@@ -161,7 +174,7 @@ class UWSMQ_Admin {
 		if ( ! empty( $status_filter ) && $status_filter !== 'all' ) {
 			$sql .= $wpdb->prepare( " WHERE status = %s", $status_filter );
 		}
-		$sql .= " ORDER BY id DESC";
+		$sql .= " ORDER BY id DESC LIMIT 200";
 		
 		$items = $wpdb->get_results( $sql );
 
@@ -170,17 +183,19 @@ class UWSMQ_Admin {
 
 	public function ajax_test_smtp() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
+		}
 		
-		$to = sanitize_text_field( $_POST['test_email'] );
-		$cc = sanitize_text_field( $_POST['test_cc'] );
-		$bcc = sanitize_text_field( $_POST['test_bcc'] );
-		$subject = sanitize_text_field( $_POST['test_subject'] );
-		$message = wp_kses_post( $_POST['test_message'] );
-		$direct_raw = $_POST['test_direct'];
-		$direct = ( $direct_raw === 'true' || $direct_raw === '1' || $direct_raw === 1 || $direct_raw === true );
+		$to      = sanitize_text_field( wp_unslash( $_POST['test_email'] ?? '' ) );
+		$cc      = sanitize_text_field( wp_unslash( $_POST['test_cc'] ?? '' ) );
+		$bcc     = sanitize_text_field( wp_unslash( $_POST['test_bcc'] ?? '' ) );
+		$subject = sanitize_text_field( wp_unslash( $_POST['test_subject'] ?? '' ) );
+		$message = wp_kses_post( wp_unslash( $_POST['test_message'] ?? '' ) );
+		$direct  = isset( $_POST['test_direct'] ) && ( $_POST['test_direct'] === 'true' || $_POST['test_direct'] === '1' );
 
 		$headers = array();
-		if ( ! empty( $cc ) ) $headers[] = 'Cc: ' . $cc;
+		if ( ! empty( $cc ) )  $headers[] = 'Cc: ' . $cc;
 		if ( ! empty( $bcc ) ) $headers[] = 'Bcc: ' . $bcc;
 		$headers[] = 'Content-Type: text/html; charset=UTF-8';
 
@@ -213,31 +228,40 @@ class UWSMQ_Admin {
 
 	public function ajax_process_queue() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
+		}
 		$mailer = UWSMQ_Mailer::get_instance();
 		$mailer->process_queue();
 		wp_send_json_success( array( 'message' => 'Queue processed successfully.' ) );
 	}
 
-	public function ajax_delete_item() {
+	public function ajax_delete_log() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
-		$id = (int)$_POST['id'];
-		global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'uwsmq_logs', array( 'id' => $id ) );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
+		}
+		$id = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
+		if ( $id > 0 ) {
+			global $wpdb;
+			$wpdb->delete( $wpdb->prefix . 'uwsmq_logs', array( 'id' => $id ), array( '%d' ) );
+		}
 		wp_send_json_success();
 	}
 
-	public function ajax_delete_log() {
-		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
-		$id = (int)$_POST['id'];
-		global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'uwsmq_logs', array( 'id' => $id ) );
-		wp_send_json_success();
+	// Alias for backwards compatibility
+	public function ajax_delete_item() {
+		$this->ajax_delete_log();
 	}
 
 	public function ajax_bulk_action() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
-		$ids = isset( $_POST['ids'] ) ? array_map( 'intval', $_POST['ids'] ) : array();
-		$action = sanitize_text_field( $_POST['bulk_action'] );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
+		}
+
+		$ids    = isset( $_POST['ids'] ) ? array_map( 'absint', (array) $_POST['ids'] ) : array();
+		$action = isset( $_POST['bulk_action'] ) ? sanitize_text_field( $_POST['bulk_action'] ) : '';
 
 		if ( empty( $ids ) ) {
 			wp_send_json_error( array( 'message' => 'No items selected.' ) );
@@ -259,6 +283,9 @@ class UWSMQ_Admin {
 
 	public function ajax_refresh_cron() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
+		}
 		wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
 		wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
 		wp_send_json_success();
@@ -266,10 +293,14 @@ class UWSMQ_Admin {
 
 	public function ajax_send_now() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
-		$id = (int)$_POST['id'];
-		
-		$mailer = UWSMQ_Mailer::get_instance();
-		$mailer->process_bulk_items( array( $id ) );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
+		}
+		$id = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
+		if ( $id > 0 ) {
+			$mailer = UWSMQ_Mailer::get_instance();
+			$mailer->process_bulk_items( array( $id ) );
+		}
 		wp_send_json_success();
 	}
 

@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class UWSMQ_Mailer {
 
 	private static $instance = null;
@@ -7,7 +11,7 @@ class UWSMQ_Mailer {
 	private $force_direct = false;
 
 	public static function get_instance() {
-		if ( self::$instance == null ) {
+		if ( self::$instance === null ) {
 			self::$instance = new self();
 		}
 		return self::$instance;
@@ -29,17 +33,14 @@ class UWSMQ_Mailer {
 			return null;
 		}
 
-		// EXTRACT DATA
 		$to          = isset( $atts['to'] ) ? $atts['to'] : '';
 		$subject     = isset( $atts['subject'] ) ? $atts['subject'] : '';
 		$message     = isset( $atts['message'] ) ? $atts['message'] : '';
 		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
 		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
 
-		// Store attachments if any
 		$stored_attachments = UWSMQ_Attachments::store_attachments( $attachments );
 
-		// Create unified entry in Logs table
 		UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers, $message, current_time( 'mysql' ), $stored_attachments, 0 );
 		
 		return true;
@@ -54,12 +55,10 @@ class UWSMQ_Mailer {
 			'attachments' => $attachments
 		);
 		
-		// If the filter returns true, it handled the queuing/logging
 		if ( $this->pre_wp_mail_filter( null, $atts ) === true ) {
 			return true;
 		}
 		
-		// Otherwise, go direct
 		return $this->original_wp_mail( $to, $subject, $message, $headers, $attachments );
 	}
 
@@ -77,13 +76,13 @@ class UWSMQ_Mailer {
 
 		$phpmailer->isSMTP();
 		$phpmailer->Host       = $settings['smtp_host'];
-		$phpmailer->SMTPAuth   = ( $settings['smtp_auth'] === 'yes' );
-		$phpmailer->Port       = $settings['smtp_port'];
-		$phpmailer->Username   = $settings['smtp_user'];
-		$phpmailer->Password   = $settings['smtp_pass'];
-		$phpmailer->SMTPSecure = $settings['smtp_secure'];
-		$phpmailer->From       = $settings['from_email'];
-		$phpmailer->FromName   = $settings['from_name'];
+		$phpmailer->SMTPAuth   = ( isset( $settings['smtp_auth'] ) && $settings['smtp_auth'] === 'yes' );
+		$phpmailer->Port       = isset( $settings['smtp_port'] ) ? $settings['smtp_port'] : 587;
+		$phpmailer->Username   = isset( $settings['smtp_user'] ) ? $settings['smtp_user'] : '';
+		$phpmailer->Password   = isset( $settings['smtp_pass'] ) ? $settings['smtp_pass'] : '';
+		$phpmailer->SMTPSecure = isset( $settings['smtp_secure'] ) ? $settings['smtp_secure'] : 'tls';
+		$phpmailer->From       = isset( $settings['from_email'] ) ? $settings['from_email'] : '';
+		$phpmailer->FromName   = isset( $settings['from_name'] ) ? $settings['from_name'] : '';
 	}
 
 	public function process_queue() {
@@ -95,7 +94,7 @@ class UWSMQ_Mailer {
 		global $wpdb;
 
 		$settings = get_option( 'uwsmq_settings' );
-		$batch_size = isset( $settings['batch_size'] ) ? (int)$settings['batch_size'] : 10;
+		$batch_size = isset( $settings['batch_size'] ) ? (int) $settings['batch_size'] : 10;
 
 		$table_name = $wpdb->prefix . 'uwsmq_logs';
 		$items = $wpdb->get_results( $wpdb->prepare(
@@ -118,6 +117,7 @@ class UWSMQ_Mailer {
 		$this->is_processing = true;
 		global $wpdb;
 		
+		$ids = array_map( 'absint', $ids );
 		$ids_placeholder = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 		$table_name = $wpdb->prefix . 'uwsmq_logs';
 		$query = $wpdb->prepare( "SELECT * FROM $table_name WHERE id IN ($ids_placeholder)", $ids );
@@ -133,7 +133,7 @@ class UWSMQ_Mailer {
 	private function process_single_item( $item ) {
 		UWSMQ_Logs::update_log_status( $item->id, 'processing' );
 		
-		$headers = maybe_unserialize( $item->headers );
+		$headers     = maybe_unserialize( $item->headers );
 		$attachments = maybe_unserialize( $item->attachments );
 
 		$result = $this->send_with_phpmailer( 
@@ -148,17 +148,30 @@ class UWSMQ_Mailer {
 			UWSMQ_Logs::update_log_status( $item->id, 'sent', '', null, true );
 		} else {
 			global $phpmailer_error;
-			UWSMQ_Logs::update_log_status( $item->id, 'failed', $phpmailer_error, null, true );
+			$error = ! empty( $phpmailer_error ) ? $phpmailer_error : 'Unknown error';
+			UWSMQ_Logs::update_log_status( $item->id, 'failed', $error, null, true );
 		}
 	}
 
 	private function send_with_phpmailer( $to, $subject, $message, $headers = '', $attachments = array() ) {
 		global $phpmailer;
 
-		if ( ! ( $phpmailer instanceof PHPMailer ) ) {
+		// WordPress 5.5+ uses namespaced PHPMailer
+		if ( file_exists( ABSPATH . WPINC . '/PHPMailer/PHPMailer.php' ) ) {
+			// WordPress 5.5+
+			require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
+			require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
+			require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
+			if ( ! ( $phpmailer instanceof PHPMailer\PHPMailer\PHPMailer ) ) {
+				$phpmailer = new PHPMailer\PHPMailer\PHPMailer( true );
+			}
+		} else {
+			// WordPress < 5.5 (legacy)
 			require_once ABSPATH . WPINC . '/class-phpmailer.php';
 			require_once ABSPATH . WPINC . '/class-smtp.php';
-			$phpmailer = new PHPMailer( true );
+			if ( ! ( $phpmailer instanceof PHPMailer ) ) {
+				$phpmailer = new PHPMailer( true );
+			}
 		}
 
 		// Reset PHPMailer
@@ -167,7 +180,6 @@ class UWSMQ_Mailer {
 		$phpmailer->clearCustomHeaders();
 		$phpmailer->clearReplyTos();
 
-		// Set Character Encoding
 		$phpmailer->CharSet = 'UTF-8';
 
 		// Apply SMTP settings
@@ -177,7 +189,7 @@ class UWSMQ_Mailer {
 			// To
 			if ( is_array( $to ) ) {
 				foreach ( $to as $recipient ) {
-					$phpmailer->addAddress( $recipient );
+					$phpmailer->addAddress( trim( $recipient ) );
 				}
 			} else {
 				$recipients = explode( ',', $to );

@@ -18,7 +18,7 @@ class UWSMQ_Updater {
 			return;
 		}
 
-		$update_url = wp_nonce_url( admin_url( 'options-general.php?page=ultimate-wp-smtp-mailing-queue&uwsmq_action=update' ), 'uwsmq_update_nonce' );
+		$update_url = wp_nonce_url( admin_url( 'admin.php?page=ultimate-wp-smtp-mailing-queue&uwsmq_action=update' ), 'uwsmq_update_nonce' );
 		?>
 		<div class="notice notice-warning is-dismissible" style="border-left-color: #6366f1; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px;">
 			<div style="font-weight: 600;">
@@ -87,7 +87,7 @@ class UWSMQ_Updater {
 		$wp_filesystem->delete( $temp_dir, true );
 
 		// Redirect back with success flag
-		wp_safe_redirect( admin_url( 'options-general.php?page=ultimate-wp-smtp-mailing-queue&uwsmq_updated=1' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=ultimate-wp-smtp-mailing-queue&uwsmq_updated=1' ) );
 		exit;
 	}
 
