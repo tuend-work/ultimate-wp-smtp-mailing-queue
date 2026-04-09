@@ -71,11 +71,17 @@ class UWSMQ_Core {
 			$key = isset( $settings['secret_key'] ) ? $settings['secret_key'] : '';
 			
 			if ( empty( $key ) || ! isset( $_GET['key'] ) || $_GET['key'] !== $key ) {
+				header('HTTP/1.0 403 Forbidden');
 				wp_die( 'Invalid process key.' );
 			}
 
+			// Prevent caching
+			header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+			header("Cache-Control: post-check=0, pre-check=0", false);
+			header("Pragma: no-cache");
+
 			$this->process_queue();
-			echo 'Queue processed.';
+			echo 'UWSMQ Queue processed at ' . current_time('mysql');
 			exit;
 		}
 	}

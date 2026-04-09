@@ -100,7 +100,19 @@ class UWSMQ_Admin {
 				break;
 			case 'email-monitor':
 				$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
-				$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron ) : 'Not scheduled';
+				$settings = get_option( 'uwsmq_settings' );
+				$dont_use_cron = isset( $settings['dont_use_wpcron'] ) && $settings['dont_use_wpcron'] === 'yes';
+
+				// Auto-fix: if not using external cron, and next cron is more than 5 mins in the past, or missing
+				if ( ! $dont_use_cron ) {
+					if ( ! $next_cron || $next_cron < time() - 300 ) {
+						wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
+						wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
+						$next_cron = wp_next_scheduled( 'uwsmq_process_queue_cron' );
+					}
+				}
+
+				$cron_status = $next_cron ? date_i18n( 'Y-m-d H:i:s', $next_cron ) : ( $dont_use_cron ? 'External Cron Managed' : 'Not scheduled' );
 				$this->display_email_monitor_page( $cron_status );
 				break;
 			case 'settings':
