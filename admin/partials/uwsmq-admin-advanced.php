@@ -52,6 +52,13 @@
                     <p class="description">Call <code><?php echo esc_url( $cron_url ); ?></code> in cron to start processing queue.</p>
                 </td>
             </tr>
+            <tr>
+                <th scope="row"><label for="interval">Cron Interval (seconds)</label></th>
+                <td>
+                    <input name="interval" type="number" id="interval" value="<?php echo esc_attr( $settings['interval'] ); ?>" class="small-text" min="60">
+                    <p class="description">The interval in seconds to process the queue when using wp_cron. Default is 300 (5 minutes).</p>
+                </td>
+            </tr>
         </table>
 
         <?php submit_button( 'Save Advanced Settings', 'primary', 'uwsmq_save_settings' ); ?>

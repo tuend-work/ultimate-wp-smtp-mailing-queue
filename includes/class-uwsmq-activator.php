@@ -33,9 +33,11 @@ class UWSMQ_Activator {
 			from_email varchar(100) DEFAULT '' NOT NULL,
 			to_email text NOT NULL,
 			subject text NOT NULL,
+			message longtext DEFAULT '' NOT NULL,
 			headers longtext DEFAULT '' NOT NULL,
 			status varchar(20) NOT NULL,
 			error_message text DEFAULT '' NOT NULL,
+			queued_at datetime DEFAULT NULL,
 			sent_at datetime DEFAULT NULL,
 			source varchar(20) DEFAULT 'direct' NOT NULL,
 			PRIMARY KEY  (id)

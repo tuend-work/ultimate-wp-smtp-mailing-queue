@@ -27,12 +27,12 @@ class UWSMQ_Logs {
 		}
 	}
 
-	public static function add_log( $to, $subject, $status, $error = '', $source = 'direct', $from = '', $headers = '' ) {
+	public static function add_log( $to, $subject, $status, $error = '', $source = 'direct', $from = '', $headers = '', $message = '', $queued_at = null ) {
 		global $wpdb;
 		
 		if ( empty( $from ) ) {
 			$settings = get_option( 'uwsmq_settings' );
-			$from = isset( $settings['from_email'] ) ? $settings['from_email'] : '';
+			$from = ! empty( $settings['smtp_user'] ) ? $settings['smtp_user'] : ( isset( $settings['from_email'] ) ? $settings['from_email'] : '' );
 		}
 
 		$wpdb->insert(
@@ -41,9 +41,11 @@ class UWSMQ_Logs {
 				'from_email'    => $from,
 				'to_email'      => is_array( $to ) ? implode( ',', $to ) : $to,
 				'subject'       => $subject,
+				'message'       => $message,
 				'headers'       => is_array( $headers ) ? serialize( $headers ) : $headers,
 				'status'        => $status,
 				'error_message' => $error,
+				'queued_at'     => $queued_at,
 				'sent_at'       => current_time( 'mysql' ),
 				'source'        => $source
 			)

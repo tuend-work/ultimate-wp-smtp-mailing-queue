@@ -127,11 +127,12 @@ class UWSMQ_Admin {
 			$new_settings['from_email']  = sanitize_email( $_POST['from_email'] );
 			$new_settings['from_name']   = sanitize_text_field( $_POST['from_name'] );
 		} elseif ( $this->current_tab === 'advanced' ) {
-			$new_settings['enable_queue'] = isset( $_POST['enable_queue'] ) ? 'yes' : 'no';
-			$new_settings['batch_size']   = (int)$_POST['batch_size'];
-			$new_settings['interval']     = (int)$_POST['interval'];
-			$new_settings['secret_key']    = sanitize_text_field( $_POST['secret_key'] );
-			$new_settings['log_limit']    = isset( $_POST['log_limit'] ) ? (int)$_POST['log_limit'] : 1000;
+			$new_settings['enable_queue']   = isset( $_POST['enable_queue'] ) ? 'yes' : 'no';
+			$new_settings['dont_use_wpcron'] = isset( $_POST['dont_use_wpcron'] ) ? 'yes' : 'no';
+			$new_settings['batch_size']     = (int)$_POST['batch_size'];
+			$new_settings['interval']       = (int)$_POST['interval'];
+			$new_settings['secret_key']     = sanitize_text_field( $_POST['secret_key'] );
+			$new_settings['log_limit']      = isset( $_POST['log_limit'] ) ? (int)$_POST['log_limit'] : 1000;
 			
 			if ( $old_settings['interval'] != $new_settings['interval'] || $old_settings['dont_use_wpcron'] != $new_settings['dont_use_wpcron'] ) {
 				wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
@@ -146,8 +147,7 @@ class UWSMQ_Admin {
 
 	private function display_tools_page() {
 		$subtabs = array(
-			'test'    => 'Test Mail',
-			'process' => 'Process Queue'
+			'test'    => 'Test Mail'
 		);
 		$current_subtab = $this->current_subtab;
 		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-tools.php';
@@ -198,11 +198,11 @@ class UWSMQ_Admin {
 
 		global $phpmailer_error;
 		if ( $result ) {
-			UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers );
+			UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers, $message );
 			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );
 		} else {
 			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : 'Failed to send email.';
-			UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers );
+			UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers, $message );
 			wp_send_json_error( array( 'message' => $error_msg ) );
 		}
 	}

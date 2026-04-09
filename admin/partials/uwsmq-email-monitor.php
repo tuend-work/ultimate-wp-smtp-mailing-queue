@@ -76,9 +76,11 @@
                                     data-to="<?php echo esc_attr( $item->to_email ); ?>" 
                                     data-subject="<?php echo esc_attr( $item->subject ); ?>" 
                                     data-status="<?php echo esc_attr( $item->status ); ?>" 
+                                    data-queued="<?php echo esc_attr( $item->queued_at ); ?>"
                                     data-sent="<?php echo esc_attr( $item->sent_at ); ?>" 
                                     data-source="<?php echo esc_attr( $item->source ); ?>" 
                                     data-headers="<?php echo esc_attr( $item->headers ); ?>"
+                                    data-message="<?php echo esc_attr( $item->message ); ?>"
                                     data-error="<?php echo esc_attr( $item->error_message ?? '' ); ?>">View</a> |
                                 <?php if ( $item->status === 'queue' || $item->status === 'failed' ) : ?>
                                     <a href="#" class="uwsmq-send-now" data-id="<?php echo esc_attr( $item->id ); ?>">Send</a> |
@@ -113,14 +115,18 @@ jQuery(document).ready(function($){
     $('.uwsmq-view-log').on('click', function(e){
         e.preventDefault();
         var data = $(this).data();
-        var headers = data.headers;
-        try {
-            // Check if it's serialized or string
-            if (headers && (headers.indexOf('a:') === 0 || headers.indexOf('s:') === 0)) {
-                // For simplicity, we just show the raw string for now or a note
-                // In a real app we might want to unserialize in JS
+        
+        var delayMsg = 'N/A';
+        if (data.queued && data.sent && data.status === 'sent') {
+            var qDate = new Date(data.queued);
+            var sDate = new Date(data.sent);
+            var diff = Math.abs(sDate - qDate) / 1000; // seconds
+            if (diff < 60) {
+                delayMsg = diff + ' seconds';
+            } else {
+                delayMsg = Math.floor(diff / 60) + ' minutes ' + (diff % 60) + ' seconds';
             }
-        } catch(e) {}
+        }
 
         var msg = '--- EMAIL DETAILS ---\n' +
                   'ID: ' + data.id + "\n" +
@@ -128,8 +134,11 @@ jQuery(document).ready(function($){
                   'To: ' + data.to + "\n" +
                   'Subject: ' + data.subject + "\n" +
                   'Status: ' + data.status + "\n" +
-                  'Sent At: ' + data.sent + "\n" +
+                  'Queued At: ' + (data.queued || 'N/A') + "\n" +
+                  'Sent At: ' + (data.sent || 'N/A') + "\n" +
+                  'Delivery Delay: ' + delayMsg + "\n" +
                   'Source: ' + data.source + "\n\n" +
+                  '--- MESSAGE CONTENT ---\n' + (data.message || 'None') + "\n\n" +
                   '--- HEADERS ---\n' + (data.headers || 'None') + "\n\n" +
                   '--- ERROR MESSAGE ---\n' + (data.error || 'None');
         alert(msg);

@@ -21,7 +21,7 @@ class UWSMQ_Queue {
 		);
 
 		if ( $result ) {
-			UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers );
+			UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers, $message, current_time( 'mysql' ) );
 		}
 
 		return $result;
