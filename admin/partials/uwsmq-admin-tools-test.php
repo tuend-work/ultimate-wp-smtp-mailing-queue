@@ -27,7 +27,7 @@
             <td><textarea id="test_message" rows="10" class="large-text"></textarea></td>
         </tr>
         <tr>
-            <th scope="row">Don't wait for cronjob</th>
+            <th scope="row">Send now?</th>
             <td>
                 <label>
                     <input type="checkbox" id="test_direct" value="1">
