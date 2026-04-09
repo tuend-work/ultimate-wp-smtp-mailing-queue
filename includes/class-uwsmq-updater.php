@@ -22,12 +22,12 @@ class UWSMQ_Updater {
 		?>
 		<div class="notice notice-warning is-dismissible" style="border-left-color: #6366f1; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px;">
 			<div style="font-weight: 600;">
-				🚀 Ultimate WP SMTP Mailing Queue Auto-Updater
+				<?php esc_html_e( 'Ultimate WP SMTP Mailing Queue Auto-Updater', 'ultimate-wp-smtp-mailing-queue' ); ?>
 			</div>
 			<div>
 				<a href="<?php echo esc_url( $update_url ); ?>" class="button button-primary" style="background: #6366f1; border-color: #6366f1;">
 					<span class="dashicons dashicons-cloud-download" style="margin-top: 4px;"></span> 
-					AUTO-UPDATE FROM GITHUB NOW
+					<?php esc_html_e( 'AUTO-UPDATE FROM GITHUB NOW', 'ultimate-wp-smtp-mailing-queue' ); ?>
 				</a>
 			</div>
 		</div>
@@ -40,7 +40,7 @@ class UWSMQ_Updater {
 		}
 
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'uwsmq_update_nonce' ) ) {
-			wp_die( 'Unauthorized action.' );
+			wp_die( esc_html__( 'Unauthorized action.', 'ultimate-wp-smtp-mailing-queue' ) );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -93,7 +93,7 @@ class UWSMQ_Updater {
 
 	public function update_success_notice() {
 		if ( isset( $_GET['uwsmq_updated'] ) ) {
-			echo '<div class="notice notice-success is-dismissible"><p>Plugin updated successfully from GitHub!</p></div>';
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Plugin updated successfully from GitHub!', 'ultimate-wp-smtp-mailing-queue' ) . '</p></div>';
 		}
 	}
 }

@@ -24,8 +24,8 @@ class UWSMQ_Admin {
 
 	public function add_plugin_admin_menu() {
 		add_menu_page(
-			'SMTP Mailing Queue',
-			'SMTP Queue',
+			__( 'SMTP Mailing Queue', 'ultimate-wp-smtp-mailing-queue' ),
+			__( 'SMTP Queue', 'ultimate-wp-smtp-mailing-queue' ),
 			'manage_options',
 			'ultimate-wp-smtp-mailing-queue',
 			array( $this, 'display_plugin_admin_page' ),
@@ -35,8 +35,8 @@ class UWSMQ_Admin {
 
 		add_submenu_page(
 			'ultimate-wp-smtp-mailing-queue',
-			'Settings',
-			'Settings',
+			__( 'Settings', 'ultimate-wp-smtp-mailing-queue' ),
+			__( 'Settings', 'ultimate-wp-smtp-mailing-queue' ),
 			'manage_options',
 			'ultimate-wp-smtp-mailing-queue',
 			array( $this, 'display_plugin_admin_page' )
@@ -61,16 +61,16 @@ class UWSMQ_Admin {
 
 	public function display_plugin_admin_page() {
 		$tabs = array(
-			'settings'      => 'SMTP Settings',
-			'advanced'      => 'Advanced Settings',
-			'test-email'    => 'Test Email',
-			'email-monitor' => 'Email Queue Monitor'
+			'settings'      => __( 'SMTP Settings', 'ultimate-wp-smtp-mailing-queue' ),
+			'advanced'      => __( 'Advanced Settings', 'ultimate-wp-smtp-mailing-queue' ),
+			'test-email'    => __( 'Test Email', 'ultimate-wp-smtp-mailing-queue' ),
+			'email-monitor' => __( 'Email Queue Monitor', 'ultimate-wp-smtp-mailing-queue' )
 		);
 
 		$settings = get_option( 'uwsmq_settings' );
 		
 		echo '<div class="wrap">';
-		echo '<h1>SMTP Mailing Queue</h1>';
+		echo '<h1>' . esc_html__( 'SMTP Mailing Queue', 'ultimate-wp-smtp-mailing-queue' ) . '</h1>';
 		
 		echo '<h2 class="nav-tab-wrapper">';
 		foreach ( $tabs as $tab => $name ) {
@@ -195,7 +195,7 @@ class UWSMQ_Admin {
 	public function ajax_test_smtp() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'ultimate-wp-smtp-mailing-queue' ) ) );
 		}
 		
 		$to      = sanitize_text_field( wp_unslash( $_POST['test_email'] ?? '' ) );
@@ -227,9 +227,9 @@ class UWSMQ_Admin {
 			if ( $direct ) {
 				UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers, $message );
 			}
-			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );
+			wp_send_json_success( array( 'message' => __( 'Email sent/queued successfully!', 'ultimate-wp-smtp-mailing-queue' ) ) );
 		} else {
-			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : 'Failed to send email.';
+			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : __( 'Failed to send email.', 'ultimate-wp-smtp-mailing-queue' );
 			if ( $direct ) {
 				UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers, $message );
 			}
@@ -244,7 +244,7 @@ class UWSMQ_Admin {
 		}
 		$mailer = UWSMQ_Mailer::get_instance();
 		$mailer->process_queue();
-		wp_send_json_success( array( 'message' => 'Queue processed successfully.' ) );
+		wp_send_json_success( array( 'message' => __( 'Queue processed successfully.', 'ultimate-wp-smtp-mailing-queue' ) ) );
 	}
 
 	public function ajax_delete_log() {
@@ -275,7 +275,7 @@ class UWSMQ_Admin {
 		$action = isset( $_POST['bulk_action'] ) ? sanitize_text_field( $_POST['bulk_action'] ) : '';
 
 		if ( empty( $ids ) ) {
-			wp_send_json_error( array( 'message' => 'No items selected.' ) );
+			wp_send_json_error( array( 'message' => __( 'No items selected.', 'ultimate-wp-smtp-mailing-queue' ) ) );
 		}
 
 		global $wpdb;

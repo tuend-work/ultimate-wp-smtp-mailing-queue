@@ -3,7 +3,7 @@
  * Plugin Name: Ultimate WP SMTP Mailing Queue
  * Plugin URI: https://example.com/ultimate-wp-smtp-mailing-queue
  * Description: A professional SMTP mailing queue plugin for WordPress. Reliable delivery, batch processing, and premium admin UI.
- * Version: 1.2.2
+ * Version: 2.0.0
  * Author: Nguyễn Đức Tuệ
  * Author URI: https://antigravity.google
  * License: GPL2
@@ -16,10 +16,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constants
-define( 'UWSMQ_VERSION', '1.2.2' );
+define( 'UWSMQ_VERSION', '2.0.0' );
 define( 'UWSMQ_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'UWSMQ_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'UWSMQ_BASENAME', plugin_basename( __FILE__ ) );
+
+/**
+ * Load plugin text domain for translations.
+ */
+function uwsmq_load_textdomain() {
+	load_plugin_textdomain( 'ultimate-wp-smtp-mailing-queue', false, dirname( UWSMQ_BASENAME ) . '/languages' );
+}
+add_action( 'plugins_loaded', 'uwsmq_load_textdomain' );
 
 /**
  * The code that runs during plugin activation.
@@ -47,7 +55,7 @@ register_deactivation_hook( __FILE__, 'deactivate_ultimate_wp_smtp_mailing_queue
  * Add "Settings" link on the Plugins list page.
  */
 function uwsmq_plugin_action_links( $links ) {
-	$settings_link = '<a href="' . admin_url( 'admin.php?page=ultimate-wp-smtp-mailing-queue' ) . '">Settings</a>';
+	$settings_link = '<a href="' . admin_url( 'admin.php?page=ultimate-wp-smtp-mailing-queue' ) . '">' . __( 'Settings', 'ultimate-wp-smtp-mailing-queue' ) . '</a>';
 	array_unshift( $links, $settings_link );
 	return $links;
 }

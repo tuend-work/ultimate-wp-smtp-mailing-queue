@@ -1,9 +1,9 @@
 <div class="wrap" id="uwsmq-monitor-wrap">
-    <h1>Email Monitor</h1>
+    <h1><?php esc_html_e( 'Email Monitor', 'ultimate-wp-smtp-mailing-queue' ); ?></h1>
     
     <div class="uwsmq-monitor-actions" style="margin-top: 10px;   margin-bottom: 10px;">
         <div>
-            <button id="uwsmq-process-all-queue" class="button button-primary">Process All Queue</button>
+            <button id="uwsmq-process-all-queue" class="button button-primary"><?php esc_html_e( 'Process All Queue', 'ultimate-wp-smtp-mailing-queue' ); ?></button>
             <span id="uwsmq-process-spinner" class="spinner" style="float: none;"></span>
         </div>
     </div>
@@ -34,11 +34,11 @@
     <div class="tablenav top">
         <div class="alignleft actions bulkactions">
             <select name="action" id="bulk-action-selector-top">
-                <option value="-1">Bulk actions</option>
-                <option value="bulk-send">Send selected</option>
-                <option value="bulk-delete">Delete selected</option>
+                <option value="-1"><?php esc_html_e( 'Bulk actions', 'ultimate-wp-smtp-mailing-queue' ); ?></option>
+                <option value="bulk-send"><?php esc_html_e( 'Send selected', 'ultimate-wp-smtp-mailing-queue' ); ?></option>
+                <option value="bulk-delete"><?php esc_html_e( 'Delete selected', 'ultimate-wp-smtp-mailing-queue' ); ?></option>
             </select>
-            <button type="button" id="doaction" class="button action">Apply</button>
+            <button type="button" id="doaction" class="button action"><?php esc_html_e( 'Apply', 'ultimate-wp-smtp-mailing-queue' ); ?></button>
             <span id="uwsmq-bulk-spinner" class="spinner" style="float: none;"></span>
         </div>
     </div>
@@ -50,19 +50,19 @@
                     <input id="cb-select-all-1" type="checkbox">
                 </td>
                 <th scope="col" class="manage-column column-id" style="width: 50px;">ID</th>
-                <th scope="col" class="manage-column column-from">From</th>
-                <th scope="col" class="manage-column column-to">To</th>
-                <th scope="col" class="manage-column column-subject">Subject</th>
-                <th scope="col" class="manage-column column-status" style="width: 100px;">Status</th>
-                <th scope="col" class="manage-column column-sent_at">Sent At</th>
-                <th scope="col" class="manage-column column-source">Source</th>
-                <th scope="col" class="manage-column column-actions">Actions</th>
+                <th scope="col" class="manage-column column-from"><?php esc_html_e( 'From', 'ultimate-wp-smtp-mailing-queue' ); ?></th>
+                <th scope="col" class="manage-column column-to"><?php esc_html_e( 'To', 'ultimate-wp-smtp-mailing-queue' ); ?></th>
+                <th scope="col" class="manage-column column-subject"><?php esc_html_e( 'Subject', 'ultimate-wp-smtp-mailing-queue' ); ?></th>
+                <th scope="col" class="manage-column column-status" style="width: 100px;"><?php esc_html_e( 'Status', 'ultimate-wp-smtp-mailing-queue' ); ?></th>
+                <th scope="col" class="manage-column column-sent_at"><?php esc_html_e( 'Sent At', 'ultimate-wp-smtp-mailing-queue' ); ?></th>
+                <th scope="col" class="manage-column column-source"><?php esc_html_e( 'Source', 'ultimate-wp-smtp-mailing-queue' ); ?></th>
+                <th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', 'ultimate-wp-smtp-mailing-queue' ); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php if ( empty( $items ) ) : ?>
                 <tr>
-                    <td colspan="9">No email logs found.</td>
+                    <td colspan="9"><?php esc_html_e( 'No email logs found.', 'ultimate-wp-smtp-mailing-queue' ); ?></td>
                 </tr>
             <?php else : ?>
                 <?php foreach ( $items as $item ) : ?>
@@ -95,11 +95,11 @@
                                     data-source="<?php echo esc_attr( $item->source ); ?>" 
                                     data-headers="<?php echo esc_attr( $item->headers ); ?>"
                                     data-message="<?php echo esc_attr( $item->message ); ?>"
-                                    data-error="<?php echo esc_attr( $item->error_message ?? '' ); ?>">View</a> |
+                                    data-error="<?php echo esc_attr( $item->error_message ?? '' ); ?>"><?php esc_html_e( 'View', 'ultimate-wp-smtp-mailing-queue' ); ?></a> |
                                 <?php if ( $item->status === 'queue' || $item->status === 'failed' ) : ?>
-                                    <a href="#" class="uwsmq-send-now" data-id="<?php echo esc_attr( $item->id ); ?>">Send</a> |
+                                    <a href="#" class="uwsmq-send-now" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Send', 'ultimate-wp-smtp-mailing-queue' ); ?></a> |
                                 <?php endif; ?>
-                                <a href="#" class="uwsmq-delete-log" data-id="<?php echo esc_attr( $item->id ); ?>" style="color: #a00;">Delete</a>
+                                <a href="#" class="uwsmq-delete-log" data-id="<?php echo esc_attr( $item->id ); ?>" style="color: #a00;"><?php esc_html_e( 'Delete', 'ultimate-wp-smtp-mailing-queue' ); ?></a>
                             </div>
                         </td>
                     </tr>
