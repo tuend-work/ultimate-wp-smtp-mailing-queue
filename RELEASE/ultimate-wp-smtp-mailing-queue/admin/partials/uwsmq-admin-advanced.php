@@ -29,10 +29,27 @@
                 </td>
             </tr>
             <tr>
-                <th scope="row">CRON Trigger Link</th>
+                <th scope="row"><label for="secret_key">Secret Key</label></th>
                 <td>
-                    <code><?php echo site_url('/?uwsmq_process=1'); ?></code>
-                    <p class="description">You can call this URL to trigger queue processing externally (e.g., via a system CRON job).</p>
+                    <input name="secret_key" type="text" id="secret_key" value="<?php echo esc_attr( $settings['secret_key'] ); ?>" class="regular-text">
+                    <p class="description">This key is needed to start processing the queue manually or via cronjob.</p>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Don't use wp_cron</th>
+                <td>
+                    <label>
+                        <input name="dont_use_wpcron" type="checkbox" id="dont_use_wpcron" value="yes" <?php checked( $settings['dont_use_wpcron'], 'yes' ); ?>>
+                        Use a real cronjob instead of wp_cron.
+                    </label>
+                    <?php 
+                    $cron_url = add_query_arg( array(
+                        'smqProcessQueue' => '',
+                        'key' => $settings['secret_key'],
+                        'time' => time()
+                    ), home_url( '/' ) );
+                    ?>
+                    <p class="description">Call <code><?php echo esc_url( $cron_url ); ?></code> in cron to start processing queue.</p>
                 </td>
             </tr>
         </table>

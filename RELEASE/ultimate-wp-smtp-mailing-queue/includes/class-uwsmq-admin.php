@@ -3,15 +3,26 @@
 class UWSMQ_Admin {
 
 	private $current_tab;
+	private $current_subtab;
 
 	public function __construct() {
 		$this->current_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'settings';
+		$this->current_subtab = isset( $_GET['subtab'] ) ? sanitize_text_field( $_GET['subtab'] ) : '';
+		
+		// Set default subtabs
+		if ( empty( $this->current_subtab ) ) {
+			if ( $this->current_tab === 'tools' ) {
+				$this->current_subtab = 'test';
+			} elseif ( $this->current_tab === 'supervisors' ) {
+				$this->current_subtab = 'processing';
+			}
+		}
 	}
 
 	public function add_plugin_admin_menu() {
 		add_options_page(
-			'Ultimate SMTP Mailing Queue',
-			'Ultimate SMTP Queue',
+			'SMTP Mailing Queue',
+			'SMTP Mailing Queue',
 			'manage_options',
 			'ultimate-wp-smtp-mailing-queue',
 			array( $this, 'display_plugin_admin_page' )
@@ -36,9 +47,10 @@ class UWSMQ_Admin {
 
 	public function display_plugin_admin_page() {
 		$tabs = array(
-			'settings' => 'SMTP Settings',
-			'advanced' => 'Advanced Settings',
-			'queue'    => 'Queue Management'
+			'settings'    => 'SMTP Settings',
+			'advanced'    => 'Advanced Settings',
+			'tools'       => 'Tools',
+			'supervisors' => 'Supervisors'
 		);
 
 		if ( isset( $_POST['uwsmq_save_settings'] ) && check_admin_referer( 'uwsmq_save_settings_action', 'uwsmq_save_settings_nonce' ) ) {
@@ -49,7 +61,7 @@ class UWSMQ_Admin {
 		$settings = get_option( 'uwsmq_settings' );
 		
 		echo '<div class="wrap">';
-		echo '<h1>Ultimate WP SMTP Mailing Queue</h1>';
+		echo '<h1>SMTP Mailing Queue</h1>';
 		
 		echo '<h2 class="nav-tab-wrapper">';
 		foreach ( $tabs as $tab => $name ) {
@@ -63,8 +75,11 @@ class UWSMQ_Admin {
 			case 'advanced':
 				include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-advanced.php';
 				break;
-			case 'queue':
-				$this->display_queue_page();
+			case 'tools':
+				$this->display_tools_page();
+				break;
+			case 'supervisors':
+				$this->display_supervisors_page();
 				break;
 			case 'settings':
 			default:
@@ -92,48 +107,85 @@ class UWSMQ_Admin {
 			$new_settings['enable_queue'] = isset( $_POST['enable_queue'] ) ? 'yes' : 'no';
 			$new_settings['batch_size']   = (int)$_POST['batch_size'];
 			$new_settings['interval']     = (int)$_POST['interval'];
+			$new_settings['secret_key']    = sanitize_text_field( $_POST['secret_key'] );
+			$new_settings['dont_use_wpcron'] = isset( $_POST['dont_use_wpcron'] ) ? 'yes' : 'no';
 			
-			// Reschedule CRON if interval changed
-			if ( $old_settings['interval'] != $new_settings['interval'] ) {
+			if ( $old_settings['interval'] != $new_settings['interval'] || $old_settings['dont_use_wpcron'] != $new_settings['dont_use_wpcron'] ) {
 				wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
-				wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
+				if ( $new_settings['dont_use_wpcron'] !== 'yes' ) {
+					wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
+				}
 			}
 		}
 
 		update_option( 'uwsmq_settings', $new_settings );
 	}
 
-	public function display_queue_page() {
+	private function display_tools_page() {
+		$subtabs = array(
+			'test'    => 'Test Mail',
+			'process' => 'Process Queue'
+		);
+		$current_subtab = $this->current_subtab;
+		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-tools.php';
+	}
+
+	private function display_supervisors_page() {
+		$subtabs = array(
+			'processing' => 'Processing',
+			'list'       => 'List Queue',
+			'errors'     => 'Sending Errors',
+			'sent'       => 'Sent'
+		);
+		$current_subtab = $this->current_subtab;
+		
 		global $wpdb;
-		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : 'pending';
 		$table_name = $wpdb->prefix . 'uwsmq_queue';
+		$items = array();
 		
-		$items = $wpdb->get_results( $wpdb->prepare( 
-			"SELECT * FROM $table_name WHERE status = %s ORDER BY created_at DESC LIMIT 100", 
-			$status_filter 
-		) );
-		
-		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-queue-display.php';
+		if ( $current_subtab === 'list' ) {
+			$items = $wpdb->get_results( "SELECT * FROM $table_name WHERE status = 'pending' ORDER BY created_at DESC" );
+		} elseif ( $current_subtab === 'errors' ) {
+			$items = $wpdb->get_results( "SELECT * FROM $table_name WHERE status = 'failed' ORDER BY created_at DESC" );
+		} elseif ( $current_subtab === 'sent' ) {
+			$items = $wpdb->get_results( "SELECT * FROM $table_name WHERE status = 'sent' ORDER BY sent_at DESC LIMIT 100" );
+		}
+
+		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-supervisors.php';
 	}
 
 	public function ajax_test_smtp() {
 		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
 		
-		$to = sanitize_email( $_POST['test_email'] );
-		if ( ! is_email( $to ) ) {
-			wp_send_json_error( array( 'message' => 'Invalid email address.' ) );
-		}
+		$to = sanitize_text_field( $_POST['test_email'] );
+		$cc = sanitize_text_field( $_POST['test_cc'] );
+		$bcc = sanitize_text_field( $_POST['test_bcc'] );
+		$subject = sanitize_text_field( $_POST['test_subject'] );
+		$message = wp_kses_post( $_POST['test_message'] );
+		$direct = isset( $_POST['test_direct'] ) && $_POST['test_direct'] === 'true';
+
+		$headers = array();
+		if ( ! empty( $cc ) ) $headers[] = 'Cc: ' . $cc;
+		if ( ! empty( $bcc ) ) $headers[] = 'Bcc: ' . $bcc;
+		$headers[] = 'Content-Type: text/html; charset=UTF-8';
 
 		$mailer = UWSMQ_Mailer::get_instance();
-		$result = $mailer->handle_wp_mail( $to, 'Ultimate SMTP Test Email', 'This is a test email.', '', array() );
+		
+		if ( $direct ) {
+			// Temporarily disable queue for this send
+			add_filter( 'pre_option_uwsmq_settings', function( $val ) {
+				$settings = get_option( 'uwsmq_settings' );
+				$settings['enable_queue'] = 'no';
+				return $settings;
+			} );
+		}
+
+		$result = wp_mail( $to, $subject, $message, $headers );
 
 		if ( $result ) {
-			if ( get_option( 'uwsmq_settings' )['enable_queue'] === 'yes' ) {
-				$mailer->process_queue();
-			}
-			wp_send_json_success( array( 'message' => 'Test email sent successfully!' ) );
+			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );
 		} else {
-			wp_send_json_error( array( 'message' => 'Failed to send test email.' ) );
+			wp_send_json_error( array( 'message' => 'Failed to send email.' ) );
 		}
 	}
 

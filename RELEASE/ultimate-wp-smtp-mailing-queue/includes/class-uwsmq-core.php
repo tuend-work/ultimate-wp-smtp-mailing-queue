@@ -59,7 +59,14 @@ class UWSMQ_Core {
 	}
 
 	public function check_external_process() {
-		if ( isset( $_GET['uwsmq_process'] ) ) {
+		if ( isset( $_GET['smqProcessQueue'] ) ) {
+			$settings = get_option( 'uwsmq_settings' );
+			$key = isset( $settings['secret_key'] ) ? $settings['secret_key'] : '';
+			
+			if ( empty( $key ) || ! isset( $_GET['key'] ) || $_GET['key'] !== $key ) {
+				wp_die( 'Invalid process key.' );
+			}
+
 			$this->process_queue();
 			echo 'Queue processed.';
 			exit;

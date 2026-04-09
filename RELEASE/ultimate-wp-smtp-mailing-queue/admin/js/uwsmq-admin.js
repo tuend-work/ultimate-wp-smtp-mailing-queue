@@ -9,43 +9,56 @@ jQuery(document).ready(function($) {
         $('#uwsmq-test-modal').hide();
     });
 
-    $('#uwsmq-send-test').on('click', function() {
-        const email = $('#uwsmq-test-email').val();
+    $('#uwsmq-send-test, #uwsmq-send-test-full').on('click', function() {
+        const isFull = $(this).attr('id') === 'uwsmq-send-test-full';
+        const email = isFull ? $('#test_to').val() : $('#uwsmq-test-email').val();
+        
         if (!email) {
             alert('Please enter a recipient email.');
             return;
         }
 
         const btn = $(this);
+        const originalText = btn.text();
         btn.prop('disabled', true).text('Sending...');
+
+        const data = {
+            action: 'uwsmq_test_smtp',
+            nonce: uwsmq_ajax.nonce,
+            test_email: email
+        };
+
+        if (isFull) {
+            data.test_cc = $('#test_cc').val();
+            data.test_bcc = $('#test_bcc').val();
+            data.test_subject = $('#test_subject').val();
+            data.test_message = $('#test_message').val();
+            data.test_direct = $('#test_direct').is(':checked');
+        }
 
         $.ajax({
             url: uwsmq_ajax.ajax_url,
             type: 'POST',
-            data: {
-                action: 'uwsmq_test_smtp',
-                nonce: uwsmq_ajax.nonce,
-                test_email: email
-            },
+            data: data,
             success: function(response) {
                 if (response.success) {
                     alert(response.data.message);
-                    $('#uwsmq-test-modal').hide();
+                    if (!isFull) $('#uwsmq-test-modal').hide();
                 } else {
                     alert('Error: ' + response.data.message);
                 }
             },
             error: function() {
-                alert('An error occurred while sending test email.');
+                alert('An error occurred.');
             },
             complete: function() {
-                btn.prop('disabled', false).text('Send Test');
+                btn.prop('disabled', false).text(originalText);
             }
         });
     });
 
-    // Process Queue Now
-    $('#uwsmq-process-now').on('click', function() {
+    // Process Queue Now (Handle both locations)
+    $('#uwsmq-process-now, #uwsmq-process-now-btn').on('click', function() {
         const btn = $(this);
         btn.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> Processing...');
 

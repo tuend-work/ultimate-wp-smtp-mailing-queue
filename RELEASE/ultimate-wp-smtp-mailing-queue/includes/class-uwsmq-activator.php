@@ -41,6 +41,8 @@ class UWSMQ_Activator {
 				'enable_queue'  => 'yes',
 				'batch_size'    => '10',
 				'interval'      => '300', // 5 minutes
+				'secret_key'    => wp_generate_password( 16, false ),
+				'dont_use_wpcron' => 'no',
 			) );
 		}
 
