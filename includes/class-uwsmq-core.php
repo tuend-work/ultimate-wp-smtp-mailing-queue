@@ -20,9 +20,11 @@ class UWSMQ_Core {
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-queue.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-mailer.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-admin.php';
+		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-updater.php';
 	}
 
 	private function define_admin_hooks() {
+		new UWSMQ_Updater();
 		$admin = new UWSMQ_Admin();
 		add_action( 'admin_menu', array( $admin, 'add_plugin_admin_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $admin, 'enqueue_styles' ) );
