@@ -10,6 +10,7 @@ class UWSMQ_Activator {
 
 		$sql = "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
+			log_id bigint(20) DEFAULT NULL,
 			to_email text NOT NULL,
 			subject text NOT NULL,
 			message longtext NOT NULL,
