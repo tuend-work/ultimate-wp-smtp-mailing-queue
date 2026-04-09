@@ -13,6 +13,10 @@ class UWSMQ_Admin {
 		$this->current_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'settings';
 		$this->current_subtab = isset( $_GET['subtab'] ) ? sanitize_text_field( $_GET['subtab'] ) : 'test';
 
+		add_action( 'admin_init', array( $this, 'maybe_save_settings' ) );
+	}
+
+	public function maybe_save_settings() {
 		if ( isset( $_POST['uwsmq_save_settings'] ) ) {
 			$this->save_settings();
 		}
