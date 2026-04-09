@@ -64,7 +64,7 @@
                 <td>
                     <label>
                         <input name="dont_use_wpcron" type="checkbox" id="dont_use_wpcron" value="yes" <?php checked( $settings['dont_use_wpcron'], 'yes' ); ?>>
-                        Setup this external cronjob if WP_CRON is disabled.
+                        Setup this cronjob to VPS / Hosting if WP_CRON is disabled.
                     </label>
                     <?php 
                     $cron_url = add_query_arg( array(
@@ -73,7 +73,7 @@
                         'time' => time()
                     ), home_url( '/' ) );
                     ?>
-                    <p class="description">Addd thist cron job <code>* * * * * wget -q -O - <?php echo esc_url( $cron_url ); ?> >/dev/null 2>&1</code> to VPS / Hosting Cronjob.</p>
+                    <p class="description"><code>* * * * * wget -q -O - <?php echo esc_url( $cron_url ); ?> >/dev/null 2>&1</code></p>
                 </td>
             </tr>
             <tr>
