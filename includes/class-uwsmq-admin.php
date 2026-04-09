@@ -203,9 +203,11 @@ class UWSMQ_Admin {
 
 		global $phpmailer_error;
 		if ( $result ) {
+			UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct' );
 			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );
 		} else {
 			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : 'Failed to send email.';
+			UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct' );
 			wp_send_json_error( array( 'message' => $error_msg ) );
 		}
 	}
