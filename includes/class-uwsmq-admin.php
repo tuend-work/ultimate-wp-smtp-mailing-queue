@@ -2,20 +2,15 @@
 
 class UWSMQ_Admin {
 
-	private $current_tab;
-	private $current_subtab;
+	protected $current_tab;
+	protected $current_subtab;
 
 	public function __construct() {
 		$this->current_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'settings';
-		$this->current_subtab = isset( $_GET['subtab'] ) ? sanitize_text_field( $_GET['subtab'] ) : '';
-		
-		// Set default subtabs
-		if ( empty( $this->current_subtab ) ) {
-			if ( $this->current_tab === 'test-email' ) {
-				$this->current_subtab = 'test';
-			} elseif ( $this->current_tab === 'supervisors' ) {
-				$this->current_subtab = 'processing';
-			}
+		$this->current_subtab = isset( $_GET['subtab'] ) ? sanitize_text_field( $_GET['subtab'] ) : 'test';
+
+		if ( isset( $_POST['uwsmq_save_settings'] ) ) {
+			$this->save_settings();
 		}
 	}
 
@@ -58,16 +53,11 @@ class UWSMQ_Admin {
 
 	public function display_plugin_admin_page() {
 		$tabs = array(
-			'settings'    => 'SMTP Settings',
-			'advanced'    => 'Advanced Settings',
-			'test-email'  => 'Test Email',
+			'settings'      => 'SMTP Settings',
+			'advanced'      => 'Advanced Settings',
+			'test-email'    => 'Test Email',
 			'email-monitor' => 'Email Monitor'
 		);
-
-		if ( isset( $_POST['uwsmq_save_settings'] ) && check_admin_referer( 'uwsmq_save_settings_action', 'uwsmq_save_settings_nonce' ) ) {
-			$this->save_settings();
-			echo '<div class="notice notice-success is-dismissible"><p>Settings saved successfully.</p></div>';
-		}
 
 		$settings = get_option( 'uwsmq_settings' );
 		
@@ -82,16 +72,9 @@ class UWSMQ_Admin {
 		echo '</h2>';
 
 		echo '<div class="uwsmq-tab-content" style="margin-top: 20px;">';
-		switch ( $this->current_tab ) {
-			case 'advanced':
-				include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-advanced.php';
-				break;
-			case 'test-email':
-				$this->display_tools_page();
-				break;
-		// Pre-calculate cron status for all settings tabs
+
+		// 1. Pre-calculate cron status for all settings tabs
 		$next_cron    = wp_next_scheduled( 'uwsmq_process_queue_cron' );
-		$settings     = get_option( 'uwsmq_settings' );
 		$dont_use_cron = isset( $settings['dont_use_wpcron'] ) && $settings['dont_use_wpcron'] === 'yes';
 
 		if ( ! $dont_use_cron ) {
@@ -106,6 +89,7 @@ class UWSMQ_Admin {
 			$cron_status = $last_ext ? 'External Cron Active (Last run: ' . date_i18n( 'Y-m-d H:i:s', $last_ext + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) . ')' : 'External Cron Managed (Waiting for first run)';
 		}
 
+		// 2. Display Tab Content
 		switch ( $this->current_tab ) {
 			case 'email-monitor':
 				$this->display_email_monitor_page( $cron_status );
@@ -113,8 +97,10 @@ class UWSMQ_Admin {
 			case 'test-email':
 				$this->display_tools_page();
 				break;
-			case 'settings':
 			case 'advanced':
+				include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-advanced.php';
+				break;
+			case 'settings':
 			default:
 				include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-admin-settings.php';
 				break;
@@ -123,7 +109,6 @@ class UWSMQ_Admin {
 		echo '</div>';
 		echo '</div>';
 	}
-
 
 	private function save_settings() {
 		$old_settings = get_option( 'uwsmq_settings' );
@@ -211,11 +196,8 @@ class UWSMQ_Admin {
 			$mailer->force_direct_send( false );
 		}
 
-
-
 		global $phpmailer_error;
 		if ( $result ) {
-			// Only log here if it was a direct send. If it was queued, UWSMQ_Queue::add_to_queue already logged it.
 			if ( $direct ) {
 				UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers, $message );
 			}
