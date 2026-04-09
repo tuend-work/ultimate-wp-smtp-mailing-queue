@@ -24,7 +24,7 @@
             $class = ( $current_status === $slug ) ? 'current' : '';
             $url = add_query_arg( array( 'tab' => 'email-monitor', 'status' => $slug ), admin_url( 'admin.php?page=ultimate-wp-smtp-mailing-queue' ) );
             ?>
-            <li class="<?php echo $slug; ?>">
+            <li class="<?php echo esc_attr( $slug ); ?>">
                 <a href="<?php echo esc_url( $url ); ?>" class="<?php echo $class; ?>"><?php echo $label; ?></a> 
                 <?php if ( $slug !== 'processing' ) echo '|'; ?>
             </li>

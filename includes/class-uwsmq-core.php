@@ -55,17 +55,25 @@ class UWSMQ_Core {
 	}
 
 	public function heartbeat() {
+		// Skip if doing AJAX or Cron
 		if ( wp_doing_ajax() || wp_doing_cron() ) {
 			return;
 		}
 
 		$settings = get_option( 'uwsmq_settings' );
+
+		// Skip if external cron is configured — let VPS handle it
+		if ( isset( $settings['dont_use_wpcron'] ) && $settings['dont_use_wpcron'] === 'yes' ) {
+			return;
+		}
+
 		$interval = isset( $settings['interval'] ) ? (int) $settings['interval'] : 300;
 		$last_run = get_transient( 'uwsmq_last_heartbeat_run' );
 
 		if ( false === $last_run ) {
-			$this->process_queue();
 			set_transient( 'uwsmq_last_heartbeat_run', time(), $interval );
+			// Process queue AFTER page has been sent to browser (non-blocking)
+			add_action( 'shutdown', array( $this, 'process_queue' ) );
 		}
 	}
 

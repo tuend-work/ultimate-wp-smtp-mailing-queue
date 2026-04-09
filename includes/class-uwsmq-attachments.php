@@ -18,7 +18,14 @@ class UWSMQ_Attachments {
 		if ( ! file_exists( $base_dir ) ) {
 			wp_mkdir_p( $base_dir );
 			// Add htaccess for security
-			file_put_contents( $base_dir . '/.htaccess', 'DENY FROM ALL' );
+			global $wp_filesystem;
+			if ( ! $wp_filesystem ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+				WP_Filesystem();
+			}
+			if ( $wp_filesystem ) {
+				$wp_filesystem->put_contents( $base_dir . '/.htaccess', 'DENY FROM ALL', FS_CHMOD_FILE );
+			}
 		}
 
 		foreach ( (array)$attachments as $attachment ) {
