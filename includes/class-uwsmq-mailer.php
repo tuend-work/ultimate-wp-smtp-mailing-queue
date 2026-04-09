@@ -22,15 +22,18 @@ class UWSMQ_Mailer {
 		$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
 
 		if ( $this->is_processing ) {
-			return null; // Don't queue if we're already processing the queue
+			error_log( 'UWSMQ: Skip queue because is_processing is true' );
+			return null;
 		}
 
 		if ( $this->force_direct ) {
-			return null; // Don't queue if explicitly forced direct (e.g. from Test Email with Send now)
+			error_log( 'UWSMQ: Skip queue because force_direct is true' );
+			return null;
 		}
 
 		if ( ! $enable_queue ) {
-			return null; // Don't queue if setting is disabled
+			error_log( 'UWSMQ: Skip queue because enable_queue setting is NOT yes' );
+			return null;
 		}
 
 		// EXTRACT DATA
@@ -40,6 +43,7 @@ class UWSMQ_Mailer {
 		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
 		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
 
+		error_log( 'UWSMQ: Email successfully added to queue: ' . $subject );
 		// Add to queue
 		UWSMQ_Queue::add_to_queue( $to, $subject, $message, $headers, $attachments );
 		
