@@ -22,24 +22,10 @@ class UWSMQ_Mailer {
 	}
 
 	public function pre_wp_mail_filter( $return, $atts ) {
-		// DEBUG: Ép hệ thống phải dừng lại và báo cáo
-		wp_die( 'UWSMQ_DEBUG_REACHED' ); 
-		
 		$settings = get_option( 'uwsmq_settings' );
 		$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
 
-		if ( $this->is_processing ) {
-			error_log( 'UWSMQ: Skip queue because is_processing is true' );
-			return null;
-		}
-
-		if ( $this->force_direct ) {
-			error_log( 'UWSMQ: Skip queue because force_direct is true' );
-			return null;
-		}
-
-		if ( ! $enable_queue ) {
-			error_log( 'UWSMQ: Skip queue because enable_queue setting is NOT yes' );
+		if ( $this->is_processing || $this->force_direct || ! $enable_queue ) {
 			return null;
 		}
 
@@ -50,7 +36,6 @@ class UWSMQ_Mailer {
 		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
 		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
 
-		error_log( 'UWSMQ: Email successfully added to queue: ' . $subject );
 		// Add to queue
 		UWSMQ_Queue::add_to_queue( $to, $subject, $message, $headers, $attachments );
 		
@@ -58,7 +43,6 @@ class UWSMQ_Mailer {
 	}
 
 	public function handle_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
-		// This is for fallback if someone calls handle_wp_mail directly
 		$atts = array(
 			'to'          => $to,
 			'subject'     => $subject,
@@ -66,12 +50,13 @@ class UWSMQ_Mailer {
 			'headers'     => $headers,
 			'attachments' => $attachments
 		);
-		$result = $this->pre_wp_mail_filter( null, $atts );
 		
-		if ( $result === true ) {
+		// If the filter returns true, it handled the queuing
+		if ( $this->pre_wp_mail_filter( null, $atts ) === true ) {
 			return true;
 		}
 		
+		// Otherwise, go direct
 		return $this->original_wp_mail( $to, $subject, $message, $headers, $attachments );
 	}
 
