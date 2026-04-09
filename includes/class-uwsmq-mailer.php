@@ -17,7 +17,31 @@ class UWSMQ_Mailer {
 		$this->force_direct = $force;
 	}
 
+	public function pre_wp_mail_filter( $return, $atts ) {
+		$settings = get_option( 'uwsmq_settings' );
+
+		// Extract attributes
+		$to          = $atts['to'];
+		$subject     = $atts['subject'];
+		$message     = $atts['message'];
+		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
+		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
+
+		// If we are currently processing the queue, or forced direct, don't re-queue
+		if ( $this->is_processing || $this->force_direct || ( isset( $settings['enable_queue'] ) && $settings['enable_queue'] !== 'yes' ) ) {
+			// Returning null tells WordPress to continue with the default wp_mail flow (which will hit our phpmailer_init)
+			return null;
+		}
+
+		// Add to queue
+		UWSMQ_Queue::add_to_queue( $to, $subject, $message, $headers, $attachments );
+		
+		// Returning true tells WordPress that the email has been "handled"
+		return true;
+	}
+
 	public function handle_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
+
 		$settings = get_option( 'uwsmq_settings' );
 
 		// If we are currently processing the queue, or forced direct, don't re-queue
