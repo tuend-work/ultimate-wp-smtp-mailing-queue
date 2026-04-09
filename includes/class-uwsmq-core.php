@@ -78,6 +78,10 @@ class UWSMQ_Core {
 	}
 
 	public function run() {
-		// Initialization logic if any
+		// Ensure database tables exist
+		if ( is_admin() ) {
+			require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-activator.php';
+			UWSMQ_Activator::activate();
+		}
 	}
 }

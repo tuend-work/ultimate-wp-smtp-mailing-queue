@@ -112,6 +112,9 @@ class UWSMQ_Mailer {
 		$phpmailer->clearCustomHeaders();
 		$phpmailer->clearReplyTos();
 
+		// Set Character Encoding
+		$phpmailer->CharSet = 'UTF-8';
+
 		// Apply SMTP settings
 		$this->init_smtp( $phpmailer );
 
@@ -169,8 +172,10 @@ class UWSMQ_Mailer {
 
 			$result = $phpmailer->send();
 			if ( ! $result ) {
+				global $phpmailer_error;
 				$phpmailer_error = $phpmailer->ErrorInfo;
 			}
+			return $result;
 
 		} catch ( Exception $e ) {
 			global $phpmailer_error;
@@ -181,4 +186,5 @@ class UWSMQ_Mailer {
 			return false;
 		}
 	}
+
 }
