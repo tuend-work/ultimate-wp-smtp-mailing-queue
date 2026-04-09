@@ -17,6 +17,7 @@ class UWSMQ_Core {
 
 	private function load_dependencies() {
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-attachments.php';
+		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-logs.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-queue.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-mailer.php';
 		require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-admin.php';
@@ -38,6 +39,7 @@ class UWSMQ_Core {
 		add_action( 'init', array( $this, 'check_external_process' ) );
 		add_filter( 'cron_schedules', array( $this, 'add_cron_intervals' ) );
 		add_action( 'uwsmq_process_queue_cron', array( $this, 'process_queue' ) );
+		add_action( 'uwsmq_maintenance_cron', array( 'UWSMQ_Logs', 'rotate_logs' ) );
 		
 		// Mailer hooks
 		$mailer = UWSMQ_Mailer::get_instance();

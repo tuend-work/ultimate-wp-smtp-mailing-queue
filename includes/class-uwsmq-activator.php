@@ -65,5 +65,8 @@ class UWSMQ_Activator {
 		if ( ! wp_next_scheduled( 'uwsmq_process_queue_cron' ) ) {
 			wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
 		}
+		if ( ! wp_next_scheduled( 'uwsmq_maintenance_cron' ) ) {
+			wp_schedule_event( time(), 'daily', 'uwsmq_maintenance_cron' );
+		}
 	}
 }

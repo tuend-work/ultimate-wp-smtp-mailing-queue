@@ -128,7 +128,7 @@ class UWSMQ_Admin {
 			$new_settings['batch_size']   = (int)$_POST['batch_size'];
 			$new_settings['interval']     = (int)$_POST['interval'];
 			$new_settings['secret_key']    = sanitize_text_field( $_POST['secret_key'] );
-			$new_settings['dont_use_wpcron'] = isset( $_POST['dont_use_wpcron'] ) ? 'yes' : 'no';
+			$new_settings['log_limit']    = isset( $_POST['log_limit'] ) ? (int)$_POST['log_limit'] : 1000;
 			
 			if ( $old_settings['interval'] != $new_settings['interval'] || $old_settings['dont_use_wpcron'] != $new_settings['dont_use_wpcron'] ) {
 				wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );

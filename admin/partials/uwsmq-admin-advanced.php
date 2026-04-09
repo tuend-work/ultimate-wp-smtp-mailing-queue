@@ -22,10 +22,10 @@
                 </td>
             </tr>
             <tr>
-                <th scope="row"><label for="interval">Process Interval</label></th>
+                <th scope="row"><label for="log_limit">Log Limit</label></th>
                 <td>
-                    <input name="interval" type="number" id="interval" value="<?php echo esc_attr( $settings['interval'] ); ?>" class="regular-text">
-                    <p class="description">Interval in seconds between queue processing. (Standard is 300 for 5 minutes).</p>
+                    <input name="log_limit" type="number" id="log_limit" value="<?php echo esc_attr( $settings['log_limit'] ); ?>" class="small-text" min="0">
+                    <p class="description">Maximum number of log entries to retain. Older logs will be deleted automatically.</p>
                 </td>
             </tr>
             <tr>
