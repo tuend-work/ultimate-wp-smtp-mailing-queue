@@ -1,7 +1,7 @@
 <div class="wrap" id="uwsmq-monitor-wrap">
     <h1>Email Monitor</h1>
     
-    <div class="uwsmq-monitor-actions" style="margin-bottom: 20px; display: flex; justify-content: flex-end; align-items: center;">
+    <div class="uwsmq-monitor-actions" style="margin-bottom: 20px; display: flex;  align-items: center;">
         <div>
             <button id="uwsmq-process-all-queue" class="button button-primary">Process All Queue</button>
             <span id="uwsmq-process-spinner" class="spinner" style="float: none;"></span>
