@@ -101,30 +101,53 @@ class UWSMQ_Mailer {
 		$items = UWSMQ_Queue::get_pending_items( $batch_size );
 
 		foreach ( $items as $item ) {
-			UWSMQ_Queue::update_status( $item->id, 'sending' );
-			
-			$headers = maybe_unserialize( $item->headers );
-			$attachments = maybe_unserialize( $item->attachments );
-
-			$result = $this->send_with_phpmailer( 
-				$item->to_email, 
-				$item->subject, 
-				$item->message, 
-				$headers, 
-				$attachments 
-			);
-
-			if ( $result ) {
-				UWSMQ_Queue::update_status( $item->id, 'sent', '', $item->attempts + 1 );
-				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'sent', '', 'queue', '', $headers, $item->message, $item->created_at );
-			} else {
-				global $phpmailer_error;
-				UWSMQ_Queue::update_status( $item->id, 'failed', $phpmailer_error, $item->attempts + 1 );
-				UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'failed', $phpmailer_error, 'queue', '', $headers, $item->message, $item->created_at );
-			}
+			$this->process_single_item( $item );
 		}
 
 		$this->is_processing = false;
+	}
+
+	public function process_bulk_items( $ids ) {
+		if ( $this->is_processing || empty( $ids ) ) {
+			return;
+		}
+
+		$this->is_processing = true;
+		global $wpdb;
+		
+		$ids_placeholder = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$query = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}uwsmq_queue WHERE id IN ($ids_placeholder)", $ids );
+		$items = $wpdb->get_results( $query );
+
+		foreach ( $items as $item ) {
+			$this->process_single_item( $item );
+		}
+
+		$this->is_processing = false;
+	}
+
+	private function process_single_item( $item ) {
+		UWSMQ_Queue::update_status( $item->id, 'sending' );
+		
+		$headers = maybe_unserialize( $item->headers );
+		$attachments = maybe_unserialize( $item->attachments );
+
+		$result = $this->send_with_phpmailer( 
+			$item->to_email, 
+			$item->subject, 
+			$item->message, 
+			$headers, 
+			$attachments 
+		);
+
+		if ( $result ) {
+			UWSMQ_Queue::update_status( $item->id, 'sent', '', $item->attempts + 1 );
+			UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'sent', '', 'queue', '', $headers, $item->message, $item->created_at );
+		} else {
+			global $phpmailer_error;
+			UWSMQ_Queue::update_status( $item->id, 'failed', $phpmailer_error, $item->attempts + 1 );
+			UWSMQ_Logs::add_log( $item->to_email, $item->subject, 'failed', $phpmailer_error, 'queue', '', $headers, $item->message, $item->created_at );
+		}
 	}
 
 	private function send_with_phpmailer( $to, $subject, $message, $headers = '', $attachments = array() ) {

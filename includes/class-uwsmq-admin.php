@@ -239,6 +239,30 @@ class UWSMQ_Admin {
 		wp_send_json_success();
 	}
 
+	public function ajax_bulk_action() {
+		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
+		$ids = isset( $_POST['ids'] ) ? array_map( 'intval', $_POST['ids'] ) : array();
+		$action = sanitize_text_field( $_POST['bulk_action'] );
+
+		if ( empty( $ids ) ) {
+			wp_send_json_error( array( 'message' => 'No items selected.' ) );
+		}
+
+		global $wpdb;
+
+		if ( $action === 'bulk-delete' ) {
+			foreach ( $ids as $id ) {
+				$wpdb->delete( $wpdb->prefix . 'uwsmq_logs', array( 'id' => $id ) );
+				$wpdb->delete( $wpdb->prefix . 'uwsmq_queue', array( 'id' => $id ) );
+			}
+		} elseif ( $action === 'bulk-send' ) {
+			$mailer = UWSMQ_Mailer::get_instance();
+			$mailer->process_bulk_items( $ids );
+		}
+
+		wp_send_json_success();
+	}
+
 	public function display_logs_page() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'uwsmq_logs';

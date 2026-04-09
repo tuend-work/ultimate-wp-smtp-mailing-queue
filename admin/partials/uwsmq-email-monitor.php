@@ -35,9 +35,24 @@
         <?php endforeach; ?>
     </ul>
 
+    <div class="tablenav top">
+        <div class="alignleft actions bulkactions">
+            <select name="action" id="bulk-action-selector-top">
+                <option value="-1">Bulk actions</option>
+                <option value="bulk-send">Send selected</option>
+                <option value="bulk-delete">Delete selected</option>
+            </select>
+            <button type="button" id="doaction" class="button action">Apply</button>
+            <span id="uwsmq-bulk-spinner" class="spinner" style="float: none;"></span>
+        </div>
+    </div>
+
     <table class="wp-list-table widefat fixed striped table-view-list" id="uwsmq-email-monitor-table">
         <thead>
             <tr>
+                <td id="cb" class="manage-column column-cb check-column">
+                    <input id="cb-select-all-1" type="checkbox">
+                </td>
                 <th scope="col" class="manage-column column-id" style="width: 50px;">ID</th>
                 <th scope="col" class="manage-column column-from">From</th>
                 <th scope="col" class="manage-column column-to">To</th>
@@ -51,11 +66,14 @@
         <tbody>
             <?php if ( empty( $items ) ) : ?>
                 <tr>
-                    <td colspan="8">No email logs found.</td>
+                    <td colspan="9">No email logs found.</td>
                 </tr>
             <?php else : ?>
                 <?php foreach ( $items as $item ) : ?>
                     <tr>
+                        <th scope="row" class="check-column">
+                            <input type="checkbox" name="log_ids[]" value="<?php echo esc_attr( $item->id ); ?>">
+                        </th>
                         <td><?php echo esc_html( $item->id ); ?></td>
                         <td><?php echo esc_html( $item->from_email ); ?></td>
                         <td><?php echo esc_html( $item->to_email ); ?></td>
@@ -96,6 +114,7 @@
 </div>
 
 <style>
+.tablenav { margin-bottom: 5px; }
 .uwsmq-status-badge {
     padding: 3px 8px;
     border-radius: 4px;
@@ -144,6 +163,48 @@ jQuery(document).ready(function($){
         alert(msg);
     });
 
+    // Select All
+    $('#cb-select-all-1').on('change', function(){
+        $('input[name="log_ids[]"]').prop('checked', $(this).prop('checked'));
+    });
+
+    // Bulk Actions
+    $('#doaction').on('click', function(){
+        var action = $('#bulk-action-selector-top').val();
+        if (action === '-1') return;
+        
+        var selectedids = [];
+        $('input[name="log_ids[]"]:checked').each(function(){
+            selectedids.push($(this).val());
+        });
+        
+        if (selectedids.length === 0) {
+            alert('Please select at least one item.');
+            return;
+        }
+        
+        if (!confirm('Are you sure you want to perform this bulk action?')) return;
+        
+        var spinner = $('#uwsmq-bulk-spinner');
+        spinner.addClass('is-active');
+        $(this).prop('disabled', true);
+        
+        $.post(uwsmq_ajax.ajax_url, {
+            action: 'uwsmq_bulk_action',
+            nonce: uwsmq_ajax.nonce,
+            bulk_action: action,
+            ids: selectedids
+        }, function(response) {
+            spinner.removeClass('is-active');
+            $('#doaction').prop('disabled', false);
+            if (response.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + response.data.message);
+            }
+        });
+    });
+
     // Delete Log
     $('.uwsmq-delete-log').on('click', function(e){
         e.preventDefault();
@@ -151,7 +212,7 @@ jQuery(document).ready(function($){
         var id = $(this).data('id');
         var row = $(this).closest('tr');
         $.post(uwsmq_ajax.ajax_url, {
-            action: 'uwsmq_delete_log', // We'll add this handler
+            action: 'uwsmq_delete_log',
             nonce: uwsmq_ajax.nonce,
             id: id
         }, function(response) {
