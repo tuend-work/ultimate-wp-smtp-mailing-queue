@@ -41,11 +41,11 @@ class UWSMQ_Admin {
 
 		add_submenu_page(
 			'ultimate-wp-smtp-mailing-queue',
-			'Email Logs',
-			'Email Logs',
+			'Email Monitor',
+			'Email Monitor',
 			'manage_options',
-			'uwsmq-logs',
-			array( $this, 'display_logs_page' )
+			'uwsmq-email-monitor',
+			array( $this, 'display_email_monitor_page' )
 		);
 	}
 
@@ -70,7 +70,7 @@ class UWSMQ_Admin {
 			'settings'    => 'SMTP Settings',
 			'advanced'    => 'Advanced Settings',
 			'tools'       => 'Tools',
-			'supervisors' => 'Supervisors'
+			'email-monitor' => 'Email Monitor'
 		);
 
 		if ( isset( $_POST['uwsmq_save_settings'] ) && check_admin_referer( 'uwsmq_save_settings_action', 'uwsmq_save_settings_nonce' ) ) {
@@ -98,8 +98,8 @@ class UWSMQ_Admin {
 			case 'tools':
 				$this->display_tools_page();
 				break;
-			case 'supervisors':
-				$this->display_supervisors_page();
+			case 'email-monitor':
+				$this->display_email_monitor_page();
 				break;
 			case 'settings':
 			default:
