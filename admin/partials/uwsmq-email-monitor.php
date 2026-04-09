@@ -169,6 +169,27 @@ jQuery(document).ready(function($){
         $('input[name="log_ids[]"]').prop('checked', $(this).prop('checked'));
     });
 
+    // Send Now (Individual)
+    $(document).on('click', '.uwsmq-send-now', function(e){
+        e.preventDefault();
+        var btn = $(this);
+        var id = btn.data('id');
+        btn.text('Sending...');
+        
+        $.post(uwsmq_ajax.ajax_url, {
+            action: 'uwsmq_send_now',
+            nonce: uwsmq_ajax.nonce,
+            id: id
+        }, function(response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + response.data.message);
+                btn.text('Send');
+            }
+        });
+    });
+
     // Refresh Cron
     $('#uwsmq-refresh-cron').on('click', function(){
         var btn = $(this);

@@ -267,11 +267,15 @@ class UWSMQ_Admin {
 		if ( $action === 'bulk-delete' ) {
 			foreach ( $ids as $id ) {
 				$wpdb->delete( $wpdb->prefix . 'uwsmq_logs', array( 'id' => $id ) );
-				$wpdb->delete( $wpdb->prefix . 'uwsmq_queue', array( 'id' => $id ) );
+				$wpdb->delete( $wpdb->prefix . 'uwsmq_queue', array( 'log_id' => $id ) );
 			}
 		} elseif ( $action === 'bulk-send' ) {
 			$mailer = UWSMQ_Mailer::get_instance();
-			$mailer->process_bulk_items( $ids );
+			$ids_placeholder = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			$qids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}uwsmq_queue WHERE log_id IN ($ids_placeholder)", $ids ) );
+			if ( ! empty( $qids ) ) {
+				$mailer->process_bulk_items( $qids );
+			}
 		}
 
 		wp_send_json_success();
@@ -282,6 +286,23 @@ class UWSMQ_Admin {
 		wp_clear_scheduled_hook( 'uwsmq_process_queue_cron' );
 		wp_schedule_event( time(), 'uwsmq_interval', 'uwsmq_process_queue_cron' );
 		wp_send_json_success();
+	}
+
+	public function ajax_send_now() {
+		check_ajax_referer( 'uwsmq_admin_nonce', 'nonce' );
+		$log_id = (int)$_POST['id'];
+		
+		global $wpdb;
+		$queue_item = $wpdb->get_row( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}uwsmq_queue WHERE log_id = %d", $log_id ) );
+		
+		$mailer = UWSMQ_Mailer::get_instance();
+		if ( $queue_item ) {
+			$mailer->process_bulk_items( array( $queue_item->id ) );
+			wp_send_json_success();
+		} else {
+			// If not found in queue by log_id, it might be an old item or already sent
+			wp_send_json_error( array( 'message' => 'Queue item not found or already processed.' ) );
+		}
 	}
 
 	public function display_logs_page() {

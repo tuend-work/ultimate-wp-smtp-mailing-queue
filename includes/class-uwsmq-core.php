@@ -34,6 +34,7 @@ class UWSMQ_Core {
 		add_action( 'wp_ajax_uwsmq_delete_log', array( $admin, 'ajax_delete_log' ) );
 		add_action( 'wp_ajax_uwsmq_bulk_action', array( $admin, 'ajax_bulk_action' ) );
 		add_action( 'wp_ajax_uwsmq_refresh_cron', array( $admin, 'ajax_refresh_cron' ) );
+		add_action( 'wp_ajax_uwsmq_send_now', array( $admin, 'ajax_send_now' ) );
 		add_action( 'wp_ajax_uwsmq_process_queue', array( $admin, 'ajax_process_queue' ) );
 		add_action( 'wp_ajax_uwsmq_delete_item', array( $admin, 'ajax_delete_item' ) );
 	}
