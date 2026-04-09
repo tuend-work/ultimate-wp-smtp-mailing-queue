@@ -1,4 +1,28 @@
 <div class="uwsmq-settings-wrap">
+    <div class="uwsmq-cron-info" style="margin-bottom: 20px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <strong>Cron Status:</strong> 
+            <span class="uwsmq-cron-time" style="color: #2271b1;"><?php echo esc_html( $cron_status ); ?></span>
+            <button id="uwsmq-refresh-cron" class="button" title="Reschedule Cron" style="padding: 0 5px; margin-left: 5px; height: 26px; line-height: 24px;">🔄</button>
+        </div>
+    </div>
+
+    <script>
+    jQuery(document).ready(function($) {
+        $('#uwsmq-refresh-cron').on('click', function(e){
+            e.preventDefault();
+            var btn = $(this);
+            btn.prop('disabled', true).text('...');
+            $.post(ajaxurl, {
+                action: 'uwsmq_refresh_cron',
+                _ajax_nonce: '<?php echo wp_create_nonce( "uwsmq_admin_nonce" ); ?>'
+            }, function(response) {
+                location.reload();
+            });
+        });
+    });
+    </script>
+
     <form method="post" action="">
         <?php wp_nonce_field( 'uwsmq_save_settings_action', 'uwsmq_save_settings_nonce' ); ?>
         

@@ -1,12 +1,7 @@
 <div class="wrap" id="uwsmq-monitor-wrap">
     <h1>Email Monitor</h1>
     
-    <div class="uwsmq-monitor-meta" style="margin-bottom: 20px; padding: 15px; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <strong>Next Cron Schedule:</strong> 
-            <span class="uwsmq-cron-time" style="color: #2271b1;"><?php echo esc_html( $cron_status ); ?></span>
-            <button id="uwsmq-refresh-cron" class="button" title="Reschedule Cron" style="padding: 0 5px; margin-left: 5px; height: 26px; line-height: 24px;">🔄</button>
-        </div>
+    <div class="uwsmq-monitor-actions" style="margin-bottom: 20px; display: flex; justify-content: flex-end; align-items: center;">
         <div>
             <button id="uwsmq-process-all-queue" class="button button-primary">Process All Queue</button>
             <span id="uwsmq-process-spinner" class="spinner" style="float: none;"></span>
