@@ -22,6 +22,9 @@ class UWSMQ_Mailer {
 	}
 
 	public function pre_wp_mail_filter( $return, $atts ) {
+		// DEBUG: Ép hệ thống phải dừng lại và báo cáo
+		wp_die( 'UWSMQ_DEBUG_REACHED' ); 
+		
 		$settings = get_option( 'uwsmq_settings' );
 		$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
 
