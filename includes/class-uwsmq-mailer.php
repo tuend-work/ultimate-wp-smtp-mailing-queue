@@ -17,6 +17,10 @@ class UWSMQ_Mailer {
 		$this->force_direct = $force;
 	}
 
+	public function get_force_direct() {
+		return $this->force_direct;
+	}
+
 	public function pre_wp_mail_filter( $return, $atts ) {
 		$settings = get_option( 'uwsmq_settings' );
 		$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
