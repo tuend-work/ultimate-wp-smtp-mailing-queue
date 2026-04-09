@@ -86,9 +86,11 @@ class UWSMQ_Mailer {
 
 			if ( $result ) {
 				UWSMQ_Queue::update_status( $item->id, 'sent', '', $item->attempts + 1 );
+				$this->save_log( $item->to_email, $item->subject, 'sent', '', 'queue' );
 			} else {
-				global $phpmailer_error; // We might need to capture error from PHPMailer
+				global $phpmailer_error;
 				UWSMQ_Queue::update_status( $item->id, 'failed', $phpmailer_error, $item->attempts + 1 );
+				$this->save_log( $item->to_email, $item->subject, 'failed', $phpmailer_error, 'queue' );
 			}
 		}
 
@@ -165,11 +167,33 @@ class UWSMQ_Mailer {
 				}
 			}
 
-			return $phpmailer->send();
+			$result = $phpmailer->send();
+			if ( ! $this->is_processing ) {
+				$this->save_log( $to, $subject, $result ? 'sent' : 'failed', $result ? '' : $phpmailer->ErrorInfo, 'direct' );
+			}
+			return $result;
 		} catch ( Exception $e ) {
 			global $phpmailer_error;
 			$phpmailer_error = $e->getMessage();
+			if ( ! $this->is_processing ) {
+				$this->save_log( $to, $subject, 'failed', $phpmailer_error, 'direct' );
+			}
 			return false;
 		}
+	}
+
+	private function save_log( $to, $subject, $status, $error = '', $source = 'direct' ) {
+		global $wpdb;
+		$wpdb->insert(
+			$wpdb->prefix . 'uwsmq_logs',
+			array(
+				'to_email'    => is_array( $to ) ? implode( ',', $to ) : $to,
+				'subject'     => $subject,
+				'status'      => $status,
+				'error_message' => $error,
+				'sent_at'     => current_time( 'mysql' ),
+				'source'      => $source
+			)
+		);
 	}
 }

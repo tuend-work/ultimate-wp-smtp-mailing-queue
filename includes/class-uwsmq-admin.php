@@ -20,12 +20,32 @@ class UWSMQ_Admin {
 	}
 
 	public function add_plugin_admin_menu() {
-		add_options_page(
+		add_menu_page(
 			'SMTP Mailing Queue',
-			'SMTP Mailing Queue',
+			'SMTP Queue',
+			'manage_options',
+			'ultimate-wp-smtp-mailing-queue',
+			array( $this, 'display_plugin_admin_page' ),
+			'dashicons-email-alt',
+			80
+		);
+
+		add_submenu_page(
+			'ultimate-wp-smtp-mailing-queue',
+			'Settings',
+			'Settings',
 			'manage_options',
 			'ultimate-wp-smtp-mailing-queue',
 			array( $this, 'display_plugin_admin_page' )
+		);
+
+		add_submenu_page(
+			'ultimate-wp-smtp-mailing-queue',
+			'Email Logs',
+			'Email Logs',
+			'manage_options',
+			'uwsmq-logs',
+			array( $this, 'display_logs_page' )
 		);
 	}
 
@@ -200,5 +220,16 @@ class UWSMQ_Admin {
 		$id = (int)$_POST['id'];
 		UWSMQ_Queue::delete_item( $id );
 		wp_send_json_success();
+	}
+
+	public function display_logs_page() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'uwsmq_logs';
+		$items = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY sent_at DESC LIMIT 100" );
+		
+		echo '<div class="wrap">';
+		echo '<h1>Email Logs</h1>';
+		include UWSMQ_PLUGIN_DIR . 'admin/partials/uwsmq-logs-display.php';
+		echo '</div>';
 	}
 }

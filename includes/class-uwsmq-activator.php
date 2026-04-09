@@ -27,6 +27,20 @@ class UWSMQ_Activator {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
 
+		$table_logs = $wpdb->prefix . 'uwsmq_logs';
+		$sql_logs = "CREATE TABLE $table_logs (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			to_email text NOT NULL,
+			subject text NOT NULL,
+			status varchar(20) NOT NULL,
+			error_message text DEFAULT '' NOT NULL,
+			sent_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+			source varchar(20) DEFAULT 'direct' NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+
+		dbDelta( $sql_logs );
+
 		// Set default options
 		if ( ! get_option( 'uwsmq_settings' ) ) {
 			update_option( 'uwsmq_settings', array(
@@ -43,6 +57,7 @@ class UWSMQ_Activator {
 				'interval'      => '300', // 5 minutes
 				'secret_key'    => wp_generate_password( 16, false ),
 				'dont_use_wpcron' => 'no',
+				'log_limit'     => '1000',
 			) );
 		}
 
