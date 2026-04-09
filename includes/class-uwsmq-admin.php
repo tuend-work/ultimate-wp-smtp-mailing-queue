@@ -201,10 +201,12 @@ class UWSMQ_Admin {
 			$mailer->force_direct_send( false );
 		}
 
+		global $phpmailer_error;
 		if ( $result ) {
 			wp_send_json_success( array( 'message' => 'Email sent/queued successfully!' ) );
 		} else {
-			wp_send_json_error( array( 'message' => 'Failed to send email.' ) );
+			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : 'Failed to send email.';
+			wp_send_json_error( array( 'message' => $error_msg ) );
 		}
 	}
 
