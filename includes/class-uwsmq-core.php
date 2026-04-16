@@ -50,7 +50,7 @@ class UWSMQ_Core {
 		
 		// Mailer hooks
 		$mailer = UWSMQ_Mailer::get_instance();
-		add_filter( 'pre_wp_mail', array( $mailer, 'pre_wp_mail_filter' ), 10, 2 );
+		add_filter( 'pre_wp_mail', array( $mailer, 'pre_wp_mail_filter' ), 1, 2 );
 		add_action( 'phpmailer_init', array( $mailer, 'init_smtp' ) );
 		add_action( 'wp_mail_failed', array( $mailer, 'log_wp_mail_failed' ) );
 	}
