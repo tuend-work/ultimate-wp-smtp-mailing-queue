@@ -212,27 +212,20 @@ class UWSMQ_Admin {
 
 		$mailer = UWSMQ_Mailer::get_instance();
 		
-		if ( $direct ) {
-			$mailer->force_direct_send( true );
-		}
-
-		$result = wp_mail( $to, $subject, $message, $headers );
+		// Luôn sử dụng send_with_phpmailer trực tiếp khi test để có debug transcript
+		$result = $mailer->send_with_phpmailer( $to, $subject, $message, $headers, array(), true );
 		
-		if ( $direct ) {
-			$mailer->force_direct_send( false );
-		}
-
 		global $phpmailer_error;
 		if ( $result ) {
-			if ( $direct ) {
-				UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers, $message );
-			}
-			wp_send_json_success( array( 'message' => __( 'Email sent/queued successfully!', 'ultimate-wp-smtp-mailing-queue' ) ) );
+			wp_send_json_success( array( 'message' => __( 'Email sent successfully!', 'ultimate-wp-smtp-mailing-queue' ) ) );
 		} else {
+			$debug_transcript = $mailer->get_debug_output();
 			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : __( 'Failed to send email.', 'ultimate-wp-smtp-mailing-queue' );
-			if ( $direct ) {
-				UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers, $message );
+			
+			if ( ! empty( $debug_transcript ) ) {
+				$error_msg .= "\n\n--- SMTP DEBUG TRANSCRIPT ---\n" . $debug_transcript;
 			}
+			
 			wp_send_json_error( array( 'message' => $error_msg ) );
 		}
 	}

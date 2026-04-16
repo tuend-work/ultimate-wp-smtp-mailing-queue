@@ -59,12 +59,9 @@ class UWSMQ_Mailer {
 			return true;
 		}
 		
-		return $this->original_wp_mail( $to, $subject, $message, $headers, $attachments );
-	}
-
-	private function original_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
+	public function original_wp_mail( $to, $subject, $message, $headers = '', $attachments = array(), $debug = false ) {
 		require_once ABSPATH . WPINC . '/pluggable.php';
-		return $this->send_with_phpmailer( $to, $subject, $message, $headers, $attachments );
+		return $this->send_with_phpmailer( $to, $subject, $message, $headers, $attachments, $debug );
 	}
 
 	public function init_smtp( $phpmailer ) {
@@ -156,7 +153,13 @@ class UWSMQ_Mailer {
 		}
 	}
 
-	private function send_with_phpmailer( $to, $subject, $message, $headers = '', $attachments = array() ) {
+	private $debug_output = '';
+
+	public function get_debug_output() {
+		return $this->debug_output;
+	}
+
+	public function send_with_phpmailer( $to, $subject, $message, $headers = '', $attachments = array(), $debug = false ) {
 		global $phpmailer;
 
 		// WordPress 5.5+ uses namespaced PHPMailer
@@ -187,6 +190,17 @@ class UWSMQ_Mailer {
 
 		// Apply SMTP settings
 		$this->init_smtp( $phpmailer );
+
+		// Debugging setup
+		if ( $debug ) {
+			$this->debug_output = '';
+			$phpmailer->SMTPDebug = 2; // Client + Server messages
+			$phpmailer->Debugoutput = function( $str, $level ) {
+				$this->debug_output .= $str . "\n";
+			};
+		} else {
+			$phpmailer->SMTPDebug = 0;
+		}
 
 		try {
 			// To
