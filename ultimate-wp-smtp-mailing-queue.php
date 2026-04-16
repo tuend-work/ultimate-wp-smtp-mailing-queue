@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constants
-define( 'UWSMQ_VERSION', '2.0.5' );
+define( 'UWSMQ_VERSION', '2.0.6' );
 define( 'UWSMQ_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'UWSMQ_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'UWSMQ_BASENAME', plugin_basename( __FILE__ ) );

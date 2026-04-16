@@ -238,19 +238,33 @@ class UWSMQ_Admin {
 				wp_send_json_error( array( 'message' => __( 'Email queueing is currently DISABLED. Please enable it in the "Advanced Settings" tab first or use "Send Direct".', 'ultimate-wp-smtp-mailing-queue' ) ) );
 			}
 
+			// Kiểm tra bảng Database có tồn tại không
+			global $wpdb;
+			$table_name = $wpdb->prefix . 'uwsmq_logs';
+			if ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) !== $table_name ) {
+				// Nếu không thấy bảng, cố gắng tạo lại ngay lập tức
+				require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-activator.php';
+				UWSMQ_Activator::activate();
+				
+				// Kiểm tra lại lần nữa
+				if ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) !== $table_name ) {
+					wp_send_json_error( array( 'message' => __( 'System Error: Database table is missing and could not be created automatically. Table name: ', 'ultimate-wp-smtp-mailing-queue' ) . $table_name . ' | DB Error: ' . $wpdb->last_error ) );
+				}
+			}
+
 			// Gửi qua hàng đợi (Queue) sử dụng wp_mail tiêu chuẩn
 			$result = wp_mail( $to, $subject, $message, $headers );
 			
 			if ( $result ) {
 				wp_send_json_success( array( 'message' => __( 'Email has been added to the queue successfully.', 'ultimate-wp-smtp-mailing-queue' ) ) );
 			} else {
-				global $wpdb;
 				$db_error = $wpdb->last_error;
 				$msg = __( 'Failed to add email to queue.', 'ultimate-wp-smtp-mailing-queue' );
 				if ( ! empty( $db_error ) ) {
 					$msg .= ' DB Error: ' . $db_error;
 				} else {
-					$msg .= ' Please check if your database tables are created correctly.';
+					// Nếu wp_mail trả về false nhưng không có lỗi DB, có thể do lỗi file attachments hoặc Filter bị chặn
+					$msg .= ' Please check your server error logs or file permissions.';
 				}
 				wp_send_json_error( array( 'message' => $msg ) );
 			}
