@@ -96,6 +96,25 @@ function uwsmq_bootstrap() {
 	add_action( 'phpmailer_init', array( $mailer, 'init_smtp' ) );
 	add_action( 'wp_mail_failed', array( $mailer, 'log_wp_mail_failed' ) );
 
+	// ── DIAGNOSTIC HOOKS (safe to remove after debugging) ──────────────────
+	// Hook 1: fires INSIDE wp_mail() after pre_wp_mail, lets us know wp_mail() was actually called
+	add_filter( 'wp_mail', function( $args ) {
+		$to = is_array( $args['to'] ) ? implode( ', ', $args['to'] ) : $args['to'];
+		UWSMQ_Mailer::static_flog( 'DIAG wp_mail filter: wp_mail() IS being called. To=' . $to . ' | Subject=' . $args['subject'] );
+		return $args;
+	}, 1 );
+
+	// Hook 2: fires right before PHPMailer sends — confirms wp_mail() reached SMTP stage
+	add_action( 'phpmailer_init', function( $phpmailer ) {
+		UWSMQ_Mailer::static_flog( 'DIAG phpmailer_init: PHPMailer is being initialized. Host=' . $phpmailer->Host . ' | From=' . $phpmailer->From );
+	}, 99 );
+
+	// Hook 3: any wp_mail failure will be logged
+	add_action( 'wp_mail_failed', function( $error ) {
+		UWSMQ_Mailer::static_flog( 'DIAG wp_mail_failed: ' . $error->get_error_message() );
+	}, 99 );
+	// ── END DIAGNOSTIC HOOKS ────────────────────────────────────────────────
+
 	// Log that bootstrap ran (for debugging)
 	UWSMQ_Mailer::static_flog( 'BOOTSTRAP: Plugin loaded. Mail hooks registered. request_uri=' . ( $_SERVER['REQUEST_URI'] ?? 'n/a' ) . ' | action=' . ( $_REQUEST['action'] ?? 'n/a' ) );
 
