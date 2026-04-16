@@ -140,21 +140,6 @@ function uwsmq_bootstrap() {
 	// Log that bootstrap ran (for debugging)
 	UWSMQ_Mailer::static_flog( 'BOOTSTRAP: Plugin loaded. Mail hooks registered. request_uri=' . ( $_SERVER['REQUEST_URI'] ?? 'n/a' ) . ' | action=' . ( $_REQUEST['action'] ?? 'n/a' ) );
 
-	// ── CRITICAL: Detect if wp_mail() has been overridden by another plugin ──
-	add_action( 'init', function() {
-		if ( function_exists( 'wp_mail' ) ) {
-			try {
-				$ref = new ReflectionFunction( 'wp_mail' );
-				UWSMQ_Mailer::static_flog( 'wp_mail() is defined in: ' . $ref->getFileName() . ' | Line: ' . $ref->getStartLine() );
-			} catch ( Exception $e ) {
-				UWSMQ_Mailer::static_flog( 'wp_mail() ReflectionFunction error: ' . $e->getMessage() );
-			}
-		} else {
-			UWSMQ_Mailer::static_flog( 'wp_mail() does NOT exist at init!' );
-		}
-	}, 1 );
-	// ────────────────────────────────────────────────────────────────────────
-
 	// Boot admin UI, cron, etc.
 	$core = new UWSMQ_Core();
 	$core->run();
