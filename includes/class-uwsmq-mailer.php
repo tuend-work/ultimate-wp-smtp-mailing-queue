@@ -261,6 +261,9 @@ class UWSMQ_Mailer {
 			if ( ! $result ) {
 				global $phpmailer_error;
 				$phpmailer_error = $phpmailer->ErrorInfo;
+				if ( ! $this->is_processing ) {
+					UWSMQ_Logs::add_log( $to, $subject, 'failed', $phpmailer_error, 'direct', '', $headers, $message );
+				}
 			}
 			return $result;
 
