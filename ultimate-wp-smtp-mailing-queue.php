@@ -113,7 +113,29 @@ function uwsmq_bootstrap() {
 	add_action( 'wp_mail_failed', function( $error ) {
 		UWSMQ_Mailer::static_flog( 'DIAG wp_mail_failed: ' . $error->get_error_message() );
 	}, 99 );
-	// ── END DIAGNOSTIC HOOKS ────────────────────────────────────────────────
+	// ── CF7-SPECIFIC DIAGNOSTICS ────────────────────────────────────────────
+	// Fires just before CF7 sends any mail
+	add_action( 'wpcf7_before_send_mail', function( $cf7 ) {
+		UWSMQ_Mailer::static_flog( 'CF7 wpcf7_before_send_mail: Form ID=' . $cf7->id() . ' | Title=' . $cf7->title() );
+	}, 1 );
+
+	// Fires when CF7 mail is sent successfully
+	add_action( 'wpcf7_mail_sent', function( $cf7 ) {
+		UWSMQ_Mailer::static_flog( 'CF7 wpcf7_mail_sent: Mail sent OK. Form ID=' . $cf7->id() );
+	}, 1 );
+
+	// Fires when CF7 mail FAILS
+	add_action( 'wpcf7_mail_failed', function( $cf7 ) {
+		UWSMQ_Mailer::static_flog( 'CF7 wpcf7_mail_failed: Mail FAILED. Form ID=' . $cf7->id() );
+	}, 1 );
+
+	// Check if skip_mail filter is active
+	add_filter( 'wpcf7_skip_mail', function( $skip, $cf7 ) {
+		UWSMQ_Mailer::static_flog( 'CF7 wpcf7_skip_mail filter: skip=' . ( $skip ? 'TRUE (mail will be skipped!)' : 'false' ) . ' | Form ID=' . $cf7->id() );
+		return $skip;
+	}, 1, 2 );
+	// ── END CF7 DIAGNOSTICS ──────────────────────────────────────────────────
+
 
 	// Log that bootstrap ran (for debugging)
 	UWSMQ_Mailer::static_flog( 'BOOTSTRAP: Plugin loaded. Mail hooks registered. request_uri=' . ( $_SERVER['REQUEST_URI'] ?? 'n/a' ) . ' | action=' . ( $_REQUEST['action'] ?? 'n/a' ) );
