@@ -59,6 +59,9 @@ class UWSMQ_Mailer {
 			return true;
 		}
 		
+		return $this->original_wp_mail( $to, $subject, $message, $headers, $attachments );
+	}
+
 	public function original_wp_mail( $to, $subject, $message, $headers = '', $attachments = array(), $debug = false ) {
 		require_once ABSPATH . WPINC . '/pluggable.php';
 		return $this->send_with_phpmailer( $to, $subject, $message, $headers, $attachments, $debug );
