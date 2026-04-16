@@ -82,7 +82,7 @@ require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-core.php';
 
 /**
  * Bootstrap: runs at plugins_loaded priority 5.
- * Loads dependencies and registers mail hooks BEFORE CF7/WooCommerce.
+ * Loads dependencies and registers mail hooks BEFORE CF7/WooCommerce (which run at default priority 10).
  */
 function uwsmq_bootstrap() {
 	// Load all required classes
@@ -90,14 +90,12 @@ function uwsmq_bootstrap() {
 	require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-logs.php';
 	require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-mailer.php';
 
-	// Register mail hooks at plugins_loaded priority 5 — runs before CF7, WooCommerce, and most other plugins
+	// Register SMTP/mail hooks directly here — guaranteed to run before most plugins
 	$mailer = UWSMQ_Mailer::get_instance();
 	add_filter( 'pre_wp_mail',    array( $mailer, 'pre_wp_mail_filter' ), 1, 2 );
 	add_action( 'phpmailer_init', array( $mailer, 'init_smtp' ) );
 	add_action( 'wp_mail_failed', array( $mailer, 'log_wp_mail_failed' ) );
 
-<<<<<<< HEAD
-=======
 	// ── DIAGNOSTIC HOOKS (safe to remove after debugging) ──────────────────
 	// Hook 1: fires INSIDE wp_mail() after pre_wp_mail, lets us know wp_mail() was actually called
 	add_filter( 'wp_mail', function( $args ) {
@@ -142,7 +140,12 @@ function uwsmq_bootstrap() {
 	// Log that bootstrap ran (for debugging)
 	UWSMQ_Mailer::static_flog( 'BOOTSTRAP: Plugin loaded. Mail hooks registered. request_uri=' . ( $_SERVER['REQUEST_URI'] ?? 'n/a' ) . ' | action=' . ( $_REQUEST['action'] ?? 'n/a' ) );
 
->>>>>>> parent of 0750575 (Update ultimate-wp-smtp-mailing-queue.php)
+	// ── Detect which plugin/file defines wp_mail() ──
+	add_action( 'init', function() {
+		$ref = new ReflectionFunction( 'wp_mail' );
+		UWSMQ_Mailer::static_flog( '>>> wp_mail() defined in: ' . $ref->getFileName() . ' | Line ' . $ref->getStartLine() );
+	}, 1 );
+
 	// Boot admin UI, cron, etc.
 	$core = new UWSMQ_Core();
 	$core->run();
