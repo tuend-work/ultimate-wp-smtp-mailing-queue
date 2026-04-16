@@ -53,6 +53,14 @@
                 </td>
             </tr>
             <tr>
+    <th scope="row"><label for="debug_mode"><?php esc_html_e( 'Enable Debug', 'ultimate-wp-smtp-mailing-queue' ); ?></label></th>
+    <td>
+        <input name="debug_mode" type="checkbox" id="debug_mode" value="yes" <?php checked( $settings['debug_mode'], 'yes' ); ?> />
+        <label for="debug_mode"><?php esc_html_e( 'Enable detailed SMTP debug output (for troubleshooting).', 'ultimate-wp-smtp-mailing-queue' ); ?></label>
+        <p class="description"><?php esc_html_e( 'When enabled, PHPMailer will output client & server messages to the log.', 'ultimate-wp-smtp-mailing-queue' ); ?></p>
+    </td>
+</tr>
+<tr>
                 <th scope="row"><label for="secret_key"><?php esc_html_e( 'Secret Key', 'ultimate-wp-smtp-mailing-queue' ); ?></label></th>
                 <td>
                     <input name="secret_key" type="text" id="secret_key" value="<?php echo esc_attr( $settings['secret_key'] ); ?>" class="regular-text">

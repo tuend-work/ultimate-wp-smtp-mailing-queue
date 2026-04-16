@@ -49,6 +49,7 @@ class UWSMQ_Activator {
 				'interval'      => '300', // 5 minutes
 				'secret_key'    => wp_generate_password( 16, false ),
 				'dont_use_wpcron' => 'no',
+				'debug_mode'   => 'no',
 				'log_limit'     => '1000',
 			) );
 		}
