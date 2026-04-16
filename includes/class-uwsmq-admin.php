@@ -231,13 +231,20 @@ class UWSMQ_Admin {
 				wp_send_json_error( array( 'message' => $error_msg ) );
 			}
 		} else {
+			$settings = get_option( 'uwsmq_settings' );
+			$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
+
+			if ( ! $enable_queue ) {
+				wp_send_json_error( array( 'message' => __( 'Email queueing is currently DISABLED. Please enable it in the "Advanced Settings" tab first or use "Send Direct".', 'ultimate-wp-smtp-mailing-queue' ) ) );
+			}
+
 			// Gửi qua hàng đợi (Queue) sử dụng wp_mail tiêu chuẩn
 			$result = wp_mail( $to, $subject, $message, $headers );
 			
 			if ( $result ) {
-				wp_send_json_success( array( 'message' => __( 'Email has been added to the queue.', 'ultimate-wp-smtp-mailing-queue' ) ) );
+				wp_send_json_success( array( 'message' => __( 'Email has been added to the queue successfully.', 'ultimate-wp-smtp-mailing-queue' ) ) );
 			} else {
-				wp_send_json_error( array( 'message' => __( 'Failed to add email to queue.', 'ultimate-wp-smtp-mailing-queue' ) ) );
+				wp_send_json_error( array( 'message' => __( 'Failed to add email to queue. Please check if your database tables are created correctly.', 'ultimate-wp-smtp-mailing-queue' ) ) );
 			}
 		}
 	}

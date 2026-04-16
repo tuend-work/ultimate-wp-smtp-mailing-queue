@@ -41,9 +41,9 @@ class UWSMQ_Mailer {
 
 		$stored_attachments = UWSMQ_Attachments::store_attachments( $attachments );
 
-		UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers, $message, current_time( 'mysql' ), $stored_attachments, 0 );
+		$log_id = UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers, $message, current_time( 'mysql' ), $stored_attachments, 0 );
 		
-		return true;
+		return (bool) $log_id;
 	}
 
 	public function handle_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
