@@ -212,21 +212,33 @@ class UWSMQ_Admin {
 
 		$mailer = UWSMQ_Mailer::get_instance();
 		
-		// Luôn sử dụng send_with_phpmailer trực tiếp khi test để có debug transcript
-		$result = $mailer->send_with_phpmailer( $to, $subject, $message, $headers, array(), true );
-		
-		global $phpmailer_error;
-		if ( $result ) {
-			wp_send_json_success( array( 'message' => __( 'Email sent successfully!', 'ultimate-wp-smtp-mailing-queue' ) ) );
-		} else {
-			$debug_transcript = $mailer->get_debug_output();
-			$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : __( 'Failed to send email.', 'ultimate-wp-smtp-mailing-queue' );
+		if ( $direct ) {
+			// Gửi trực tiếp và lấy debug transcript
+			$result = $mailer->send_with_phpmailer( $to, $subject, $message, $headers, array(), true );
 			
-			if ( ! empty( $debug_transcript ) ) {
-				$error_msg .= "\n\n--- SMTP DEBUG TRANSCRIPT ---\n" . $debug_transcript;
+			global $phpmailer_error;
+			if ( $result ) {
+				UWSMQ_Logs::add_log( $to, $subject, 'sent', '', 'direct', '', $headers, $message );
+				wp_send_json_success( array( 'message' => __( 'Email sent successfully (Direct)!', 'ultimate-wp-smtp-mailing-queue' ) ) );
+			} else {
+				$debug_transcript = $mailer->get_debug_output();
+				$error_msg = ! empty( $phpmailer_error ) ? $phpmailer_error : __( 'Failed to send email.', 'ultimate-wp-smtp-mailing-queue' );
+				
+				if ( ! empty( $debug_transcript ) ) {
+					$error_msg .= "\n\n--- SMTP DEBUG TRANSCRIPT ---\n" . $debug_transcript;
+				}
+				UWSMQ_Logs::add_log( $to, $subject, 'failed', $error_msg, 'direct', '', $headers, $message );
+				wp_send_json_error( array( 'message' => $error_msg ) );
 			}
+		} else {
+			// Gửi qua hàng đợi (Queue) sử dụng wp_mail tiêu chuẩn
+			$result = wp_mail( $to, $subject, $message, $headers );
 			
-			wp_send_json_error( array( 'message' => $error_msg ) );
+			if ( $result ) {
+				wp_send_json_success( array( 'message' => __( 'Email has been added to the queue.', 'ultimate-wp-smtp-mailing-queue' ) ) );
+			} else {
+				wp_send_json_error( array( 'message' => __( 'Failed to add email to queue.', 'ultimate-wp-smtp-mailing-queue' ) ) );
+			}
 		}
 	}
 
