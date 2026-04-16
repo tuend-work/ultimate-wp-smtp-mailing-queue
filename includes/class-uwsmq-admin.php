@@ -252,19 +252,25 @@ class UWSMQ_Admin {
 				}
 			}
 
-			// Gửi qua hàng đợi (Queue) sử dụng wp_mail tiêu chuẩn
-			$result = wp_mail( $to, $subject, $message, $headers );
+			// Ép buộc nạp vào hàng đợi (Queue) thông qua Mailer của plugin
+			$atts = array(
+				'to'          => $to,
+				'subject'     => $subject,
+				'message'     => $message,
+				'headers'     => $headers,
+				'attachments' => array()
+			);
+			$result = $mailer->pre_wp_mail_filter( null, $atts );
 			
-			if ( $result ) {
-				wp_send_json_success( array( 'message' => __( 'Email has been added to the queue successfully.', 'ultimate-wp-smtp-mailing-queue' ) ) );
+			if ( $result === true ) {
+				wp_send_json_success( array( 'message' => __( 'Email has been added to the queue successfully (Direct Queue).', 'ultimate-wp-smtp-mailing-queue' ) ) );
 			} else {
 				$db_error = $wpdb->last_error;
 				$msg = __( 'Failed to add email to queue.', 'ultimate-wp-smtp-mailing-queue' );
 				if ( ! empty( $db_error ) ) {
 					$msg .= ' DB Error: ' . $db_error;
 				} else {
-					// Nếu wp_mail trả về false nhưng không có lỗi DB, có thể do lỗi file attachments hoặc Filter bị chặn
-					$msg .= ' Please check your server error logs or file permissions.';
+					$msg .= ' Please check if your database tables are created correctly and your PHP error log.';
 				}
 				wp_send_json_error( array( 'message' => $msg ) );
 			}
