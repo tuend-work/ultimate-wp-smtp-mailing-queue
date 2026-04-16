@@ -150,6 +150,7 @@ class UWSMQ_Admin {
 			$new_settings['interval']        = isset( $_POST['interval'] ) ? absint( $_POST['interval'] ) : 300;
 			$new_settings['secret_key']      = sanitize_text_field( trim( wp_unslash( $_POST['secret_key'] ?? '' ) ) );
 			$new_settings['log_limit']       = isset( $_POST['log_limit'] ) ? absint( $_POST['log_limit'] ) : 1000;
+			$new_settings['debug_mode']      = isset( $_POST['debug_mode'] ) ? 'yes' : 'no';
 
 			update_option( 'uwsmq_settings', $new_settings );
 
