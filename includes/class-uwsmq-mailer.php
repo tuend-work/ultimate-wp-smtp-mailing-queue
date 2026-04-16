@@ -29,7 +29,7 @@ class UWSMQ_Mailer {
 		$settings = get_option( 'uwsmq_settings' );
 		$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
 
-		if ( $this->is_processing || $this->force_direct || ! $enable_queue ) {
+		if ( $this->force_direct || ! $enable_queue ) {
 			return null;
 		}
 
