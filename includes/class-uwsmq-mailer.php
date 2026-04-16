@@ -25,37 +25,57 @@ class UWSMQ_Mailer {
 		return $this->force_direct;
 	}
 
+	// ─── Static file logger ──────────────────────────────────────────────────
+	private static function flog( $msg ) {
+		$log_file = WP_CONTENT_DIR . '/smtp-queue.log';
+		$line     = '[' . date( 'Y-m-d H:i:s' ) . ' UTC] ' . $msg . "\n";
+		file_put_contents( $log_file, $line, FILE_APPEND | LOCK_EX );
+	}
+
 	public function pre_wp_mail_filter( $return, $atts ) {
+		self::flog( '━━━ pre_wp_mail_filter CALLED ━━━' );
+
 		$settings     = get_option( 'uwsmq_settings' );
 		$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
+		$force_direct = $this->force_direct;
+
+		self::flog( 'enable_queue=' . ( $enable_queue ? 'yes' : 'no' ) . ' | force_direct=' . ( $force_direct ? 'yes' : 'no' ) );
 
 		// Queue disabled or forced direct → let WordPress send normally
-		if ( $this->force_direct || ! $enable_queue ) {
+		if ( $force_direct || ! $enable_queue ) {
+			self::flog( 'SKIP: queue disabled or force_direct. Returning null (WP will send normally).' );
 			return null;
 		}
 
-		$to          = isset( $atts['to'] ) ? $atts['to'] : '';
-		$subject     = isset( $atts['subject'] ) ? $atts['subject'] : '';
-		$message     = isset( $atts['message'] ) ? $atts['message'] : '';
-		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
+		$to      = isset( $atts['to'] ) ? $atts['to'] : '';
+		$subject = isset( $atts['subject'] ) ? $atts['subject'] : '';
+		$message = isset( $atts['message'] ) ? $atts['message'] : '';
+		$headers = isset( $atts['headers'] ) ? $atts['headers'] : '';
 		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
 
-		// Debug log: confirm filter is being called
-		if ( isset( $settings['debug_mode'] ) && $settings['debug_mode'] === 'yes' ) {
-			error_log( '[UWSMQ] pre_wp_mail_filter called. To: ' . ( is_array( $to ) ? implode( ',', $to ) : $to ) . ' | Subject: ' . $subject );
-		}
+		$to_str = is_array( $to ) ? implode( ', ', $to ) : $to;
+		self::flog( 'To: ' . $to_str . ' | Subject: ' . $subject );
 
-		// Check DB table exists first
+		// Check DB table
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'uwsmq_logs';
-		if ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) !== $table_name ) {
-			error_log( '[UWSMQ] ERROR: DB table missing: ' . $table_name . '. Falling back to normal wp_mail.' );
-			// Recreate table
+		$table_exists = ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) === $table_name );
+		self::flog( 'DB table (' . $table_name . ') exists: ' . ( $table_exists ? 'YES' : 'NO' ) );
+
+		if ( ! $table_exists ) {
+			self::flog( 'Attempting to recreate DB table...' );
 			require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-activator.php';
 			UWSMQ_Activator::activate();
+			$table_exists = ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) === $table_name );
+			self::flog( 'After recreate - table exists: ' . ( $table_exists ? 'YES' : 'NO' ) );
+			if ( ! $table_exists ) {
+				self::flog( 'FATAL: Cannot create DB table. Returning null (WP will try to send normally).' );
+				return null;
+			}
 		}
 
 		$stored_attachments = UWSMQ_Attachments::store_attachments( $attachments );
+		self::flog( 'Attachments stored: ' . count( (array) $stored_attachments ) );
 
 		$log_id = UWSMQ_Logs::add_log(
 			$to,
@@ -72,14 +92,12 @@ class UWSMQ_Mailer {
 		);
 
 		if ( ! $log_id ) {
-			// DB insert failed → log error and let WordPress send normally via SMTP
-			error_log( '[UWSMQ] ERROR: Failed to add email to queue. DB error: ' . $wpdb->last_error . ' | To: ' . ( is_array( $to ) ? implode( ',', $to ) : $to ) );
-			return null; // Let wp_mail continue normally (will still use our SMTP via phpmailer_init)
+			self::flog( 'ERROR: DB insert failed. wpdb->last_error: ' . $wpdb->last_error );
+			self::flog( 'Returning null so WP sends normally via phpmailer_init SMTP.' );
+			return null;
 		}
 
-		if ( isset( $settings['debug_mode'] ) && $settings['debug_mode'] === 'yes' ) {
-			error_log( '[UWSMQ] Email queued successfully. Log ID: ' . $log_id );
-		}
+		self::flog( 'SUCCESS: Email queued. log_id=' . $log_id . '. Returning true to wp_mail().' );
 
 		// Return true → wp_mail() considers it "sent" (it's actually queued)
 		return true;
