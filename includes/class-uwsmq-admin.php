@@ -244,7 +244,15 @@ class UWSMQ_Admin {
 			if ( $result ) {
 				wp_send_json_success( array( 'message' => __( 'Email has been added to the queue successfully.', 'ultimate-wp-smtp-mailing-queue' ) ) );
 			} else {
-				wp_send_json_error( array( 'message' => __( 'Failed to add email to queue. Please check if your database tables are created correctly.', 'ultimate-wp-smtp-mailing-queue' ) ) );
+				global $wpdb;
+				$db_error = $wpdb->last_error;
+				$msg = __( 'Failed to add email to queue.', 'ultimate-wp-smtp-mailing-queue' );
+				if ( ! empty( $db_error ) ) {
+					$msg .= ' DB Error: ' . $db_error;
+				} else {
+					$msg .= ' Please check if your database tables are created correctly.';
+				}
+				wp_send_json_error( array( 'message' => $msg ) );
 			}
 		}
 	}
