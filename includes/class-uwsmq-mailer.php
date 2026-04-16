@@ -25,10 +25,14 @@ class UWSMQ_Mailer {
 		return $this->force_direct;
 	}
 
-	// ─── Static file logger ──────────────────────────────────────────────────
+	// ─── File logger ──────────────────────────────────────────────────────────
 	private static function flog( $msg ) {
+		self::static_flog( $msg );
+	}
+
+	public static function static_flog( $msg ) {
 		$log_file = WP_CONTENT_DIR . '/smtp-queue.log';
-		$line     = '[' . date( 'Y-m-d H:i:s' ) . ' UTC] ' . $msg . "\n";
+		$line     = '[' . gmdate( 'Y-m-d H:i:s' ) . ' UTC] ' . $msg . "\n";
 		file_put_contents( $log_file, $line, FILE_APPEND | LOCK_EX );
 	}
 

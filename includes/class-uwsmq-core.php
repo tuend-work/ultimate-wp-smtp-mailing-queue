@@ -47,12 +47,8 @@ class UWSMQ_Core {
 		add_filter( 'cron_schedules', array( $this, 'add_cron_intervals' ) );
 		add_action( 'uwsmq_process_queue_cron', array( $this, 'process_queue' ) );
 		add_action( 'uwsmq_maintenance_cron', array( 'UWSMQ_Logs', 'rotate_logs' ) );
-		
-		// Mailer hooks
-		$mailer = UWSMQ_Mailer::get_instance();
-		add_filter( 'pre_wp_mail', array( $mailer, 'pre_wp_mail_filter' ), 1, 2 );
-		add_action( 'phpmailer_init', array( $mailer, 'init_smtp' ) );
-		add_action( 'wp_mail_failed', array( $mailer, 'log_wp_mail_failed' ) );
+		// Mail hooks (pre_wp_mail, phpmailer_init, wp_mail_failed) are registered
+		// in uwsmq_bootstrap() at plugins_loaded priority 5.
 	}
 
 	public function heartbeat() {
