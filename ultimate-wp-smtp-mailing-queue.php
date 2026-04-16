@@ -140,6 +140,12 @@ function uwsmq_bootstrap() {
 	// Log that bootstrap ran (for debugging)
 	UWSMQ_Mailer::static_flog( 'BOOTSTRAP: Plugin loaded. Mail hooks registered. request_uri=' . ( $_SERVER['REQUEST_URI'] ?? 'n/a' ) . ' | action=' . ( $_REQUEST['action'] ?? 'n/a' ) );
 
+	// ── Detect which plugin/file defines wp_mail() ──
+	add_action( 'init', function() {
+		$ref = new ReflectionFunction( 'wp_mail' );
+		UWSMQ_Mailer::static_flog( '>>> wp_mail() defined in: ' . $ref->getFileName() . ' | Line ' . $ref->getStartLine() );
+	}, 1 );
+
 	// Boot admin UI, cron, etc.
 	$core = new UWSMQ_Core();
 	$core->run();
