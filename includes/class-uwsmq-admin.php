@@ -140,7 +140,7 @@ class UWSMQ_Admin {
 			$new_settings['smtp_auth']   = isset( $_POST['smtp_auth'] ) ? 'yes' : 'no';
 			$new_settings['smtp_user']   = sanitize_text_field( trim( wp_unslash( $_POST['smtp_user'] ?? '' ) ) );
 			$new_settings['smtp_pass']   = trim( wp_unslash( $_POST['smtp_pass'] ?? '' ) );
-			$new_settings['smtp_secure'] = sanitize_text_field( wp_unslash( $_POST['smtp_secure'] ?? 'tls' ) );
+			$new_settings['smtp_secure'] = sanitize_text_field( trim( wp_unslash( $_POST['smtp_secure'] ?? 'tls' ) ) );
 			$new_settings['from_email']  = sanitize_email( trim( wp_unslash( $_POST['from_email'] ?? '' ) ) );
 			$new_settings['from_name']   = sanitize_text_field( trim( wp_unslash( $_POST['from_name'] ?? '' ) ) );
 		} elseif ( $this->current_tab === 'advanced' ) {
@@ -148,7 +148,7 @@ class UWSMQ_Admin {
 			$new_settings['dont_use_wpcron'] = isset( $_POST['dont_use_wpcron'] ) ? 'yes' : 'no';
 			$new_settings['batch_size']      = isset( $_POST['batch_size'] ) ? absint( $_POST['batch_size'] ) : 10;
 			$new_settings['interval']        = isset( $_POST['interval'] ) ? absint( $_POST['interval'] ) : 300;
-			$new_settings['secret_key']      = sanitize_text_field( wp_unslash( $_POST['secret_key'] ?? '' ) );
+			$new_settings['secret_key']      = sanitize_text_field( trim( wp_unslash( $_POST['secret_key'] ?? '' ) ) );
 			$new_settings['log_limit']       = isset( $_POST['log_limit'] ) ? absint( $_POST['log_limit'] ) : 1000;
 
 			update_option( 'uwsmq_settings', $new_settings );
