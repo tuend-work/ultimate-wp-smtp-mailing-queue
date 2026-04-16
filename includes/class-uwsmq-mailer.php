@@ -26,9 +26,10 @@ class UWSMQ_Mailer {
 	}
 
 	public function pre_wp_mail_filter( $return, $atts ) {
-		$settings = get_option( 'uwsmq_settings' );
+		$settings     = get_option( 'uwsmq_settings' );
 		$enable_queue = isset( $settings['enable_queue'] ) && $settings['enable_queue'] === 'yes';
 
+		// Queue disabled or forced direct → let WordPress send normally
 		if ( $this->force_direct || ! $enable_queue ) {
 			return null;
 		}
@@ -39,11 +40,49 @@ class UWSMQ_Mailer {
 		$headers     = isset( $atts['headers'] ) ? $atts['headers'] : '';
 		$attachments = isset( $atts['attachments'] ) ? $atts['attachments'] : array();
 
+		// Debug log: confirm filter is being called
+		if ( isset( $settings['debug_mode'] ) && $settings['debug_mode'] === 'yes' ) {
+			error_log( '[UWSMQ] pre_wp_mail_filter called. To: ' . ( is_array( $to ) ? implode( ',', $to ) : $to ) . ' | Subject: ' . $subject );
+		}
+
+		// Check DB table exists first
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'uwsmq_logs';
+		if ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) !== $table_name ) {
+			error_log( '[UWSMQ] ERROR: DB table missing: ' . $table_name . '. Falling back to normal wp_mail.' );
+			// Recreate table
+			require_once UWSMQ_PLUGIN_DIR . 'includes/class-uwsmq-activator.php';
+			UWSMQ_Activator::activate();
+		}
+
 		$stored_attachments = UWSMQ_Attachments::store_attachments( $attachments );
 
-		$log_id = UWSMQ_Logs::add_log( $to, $subject, 'queue', '', 'queue', '', $headers, $message, current_time( 'mysql' ), $stored_attachments, 0 );
-		
-		return (bool) $log_id;
+		$log_id = UWSMQ_Logs::add_log(
+			$to,
+			$subject,
+			'queue',
+			'',
+			'queue',
+			'',
+			$headers,
+			$message,
+			current_time( 'mysql' ),
+			$stored_attachments,
+			0
+		);
+
+		if ( ! $log_id ) {
+			// DB insert failed → log error and let WordPress send normally via SMTP
+			error_log( '[UWSMQ] ERROR: Failed to add email to queue. DB error: ' . $wpdb->last_error . ' | To: ' . ( is_array( $to ) ? implode( ',', $to ) : $to ) );
+			return null; // Let wp_mail continue normally (will still use our SMTP via phpmailer_init)
+		}
+
+		if ( isset( $settings['debug_mode'] ) && $settings['debug_mode'] === 'yes' ) {
+			error_log( '[UWSMQ] Email queued successfully. Log ID: ' . $log_id );
+		}
+
+		// Return true → wp_mail() considers it "sent" (it's actually queued)
+		return true;
 	}
 
 	public function handle_wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
