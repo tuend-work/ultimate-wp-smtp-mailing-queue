@@ -274,4 +274,16 @@ class UWSMQ_Mailer {
 		}
 	}
 
+	public function log_wp_mail_failed( $wp_error ) {
+		if ( ! is_wp_error( $wp_error ) ) {
+			return;
+		}
+
+		$data = $wp_error->get_error_data();
+		$to      = isset($data['to']) ? (is_array($data['to']) ? implode(',', $data['to']) : $data['to']) : '';
+		$subject = isset($data['subject']) ? $data['subject'] : '';
+		$message = $wp_error->get_error_message();
+
+		UWSMQ_Logs::add_log( $to, $subject, 'failed', $message, 'wp_mail_failed' );
+	}
 }
