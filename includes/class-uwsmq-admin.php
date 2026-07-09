@@ -23,26 +23,31 @@ class UWSMQ_Admin {
 	}
 
 	public function add_plugin_admin_menu() {
-		// Add Parent Menu "Ultimate WP" if it does not exist
-		add_menu_page(
-			'Ultimate WP Dashboard',
-			'Ultimate WP',
-			'manage_options',
-			'ultimate-wp',
-			'ultimate_wp_render_dashboard', // Call global function
-			'dashicons-superhero',
-			2.1
-		);
+		global $menu, $submenu;
 
-		// Add Submenu for Dashboard
-		add_submenu_page(
-			'ultimate-wp',
-			'Ultimate WP Dashboard',
-			'Dashboard',
-			'manage_options',
-			'ultimate-wp',
-			'ultimate_wp_render_dashboard'
-		);
+		// Check if Parent Menu "ultimate-wp" already exists
+		$parent_exists = false;
+		if ( is_array( $menu ) ) {
+			foreach ( $menu as $item ) {
+				if ( isset( $item[2] ) && $item[2] === 'ultimate-wp' ) {
+					$parent_exists = true;
+					break;
+				}
+			}
+		}
+
+		// Add Parent Menu if not registered yet
+		if ( ! $parent_exists ) {
+			add_menu_page(
+				'Ultimate WP Dashboard',
+				'Ultimate WP',
+				'manage_options',
+				'ultimate-wp',
+				'ultimate_wp_render_dashboard',
+				'dashicons-superhero',
+				2 // Fixed integer position to avoid float key mismatch
+			);
+		}
 
 		// Add Submenu for SMTP Queue settings
 		add_submenu_page(
@@ -53,6 +58,15 @@ class UWSMQ_Admin {
 			'ultimate-wp-smtp-mailing-queue',
 			array( $this, 'display_plugin_admin_page' )
 		);
+
+		// Rename the first default submenu (created automatically by WordPress) from "Ultimate WP" to "Dashboard"
+		if ( isset( $submenu['ultimate-wp'] ) && is_array( $submenu['ultimate-wp'] ) ) {
+			foreach ( $submenu['ultimate-wp'] as $key => $item ) {
+				if ( isset( $item[2] ) && $item[2] === 'ultimate-wp' ) {
+					$submenu['ultimate-wp'][$key][0] = 'Dashboard';
+				}
+			}
+		}
 	}
 
 	public function enqueue_styles() {
